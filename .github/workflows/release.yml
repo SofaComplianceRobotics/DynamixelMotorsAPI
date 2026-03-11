@@ -1,0 +1,96 @@
+# This workflow will upload a Python Package to PyPI when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Build, Realease and Publish Python Package with doc
+
+on: 
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 3 * * *' # nightly job at 3am UTC
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build release distributions
+        shell: powershell
+        run: |
+          python -m pip install build pydoc-markdown
+          python -m build
+          pydoc-markdown
+          $file = get-content dynamixelmotors-api.md
+          $file | ForEach-Object {if ($_.ReadCount -eq 1) {$_ -replace "^.*", "# Dynamixel Motors API"} else {$_}} | Set-Content .\dynamixelmotors-api.md
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: |
+            dist/
+            dynamixelmotors-api.md
+
+  release:
+    name: Create Release
+    if: always() && startsWith(github.ref, 'refs/heads/') # we are on a branch (not a PR), always() is used to run even if needed steps fail
+    needs:
+      - build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+      - name: Download the artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+          path: artifacts/
+         
+      - name: Set env vars and rename executables
+        shell: powershell
+        run: |
+          $releaseDate = Get-Date -Format "yyyy-MM-dd (at HH:mm:ss UTC)"
+          echo "RELEASE_DATE=$releaseDate" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Delete old release
+        uses: dev-drprasad/delete-tag-and-release@v1.0.1
+        with:
+          tag_name: release-${{ github.ref_name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+          
+      - name: Create Release
+        if: success() || failure()
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: release-${{ github.ref_name }}
+          fail_on_unmatched_files: false
+          draft: false
+          body: |
+            Last updated on ${{ env.RELEASE_DATE }}.
+          files: |
+            artifacts/dist/*
+            artifacts/dynamixelmotors-api.md
