@@ -1,16 +1,16 @@
-# Robot Motors API
+# Dynamixel Motors API
 
-Robot Motors API is a simple and easy-to-use API for controling the Robot Motors robot from [Compliance Robotics](https://compliance-robotics.com/).
+Dynamixel Motors API is a simple and easy-to-use API for controling the Dynamixel motors from [Compliance Robotics](https://compliance-robotics.com/).
 
 ## Installation
-To install the Robot Motors API, you can use pip:
+To install the Dynamixel Motors API, you can use pip:
 
 ```bash
-python -m pip install git+https://github.com/SofaComplianceRobotics/DynamixelMotors.git@release-main
+python -m pip install git+https://github.com/SofaComplianceRobotics/DynamixelMotorsAPI.git@release-main
 ```
 
 ## Usage
-TheDynamixel Motors API provides the `DynamixelMotors` class, which can be used to control the Motors. The API provides methods for controlling the robot's motors.
+The Dynamixel Motors API provides the `DynamixelMotors` class, which can be used to control the Motors. The API provides methods for controlling the robot's motors.
 You can look at the [motors_example.py](motors_example.py) file for a simple example of how to use the API to control the motors of the motors.
 
 
