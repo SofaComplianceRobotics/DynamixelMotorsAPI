@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dynamixelmotorsapi"
+version = "0.2.0"
+requires-python = ">=3.10"
+readme = "README.md"
+dependencies = [
+    "pyserial",
+ "dynamixel_sdk",
+ "numpy==1.26.4",
+]
+description = "An API for controlling  the motors of a group of Dynamixel motors."
+keywords = ["robotics", "api", "dynamixel"]
+authors = [
+    {name = "Compliance Robotics", email = "support@compliance-robotics.com"}
+]
+
+[project.urls]
+Repository = "https://github.com/SofaComplianceRobotics/DynamixelMotors.API"
+
+
+#######
+# Configuration for pydoc-markdown
+
+[[tool.pydoc-markdown.loaders]]
+type = "python"
+
+[[tool.pydoc-markdown.processors]]
+type = "filter"
+skip_empty_modules = true
+exclude_private = true
+expression = "not name.startswith('_') and '_' not in obj.location.filename and default()"
+
+[[tool.pydoc-markdown.processors]]
+type="smart"
+
+[[tool.pydoc-markdown.processors]]
+type="crossref"
+
+[tool.pydoc-markdown.renderer]
+type = "markdown"
+filename = "dynamixelmotors-api.md"
+descriptive_class_title = false
+descriptive_module_title = false
+render_page_title = true
+render_module_header = false
+add_module_prefix = false
+add_full_prefix = false
+insert_header_anchors = false
+classdef_code_block = true
+signature_code_block = true
+signature_in_header = true
+code_headers = false
+use_fixed_header_levels = true
+render_toc = false
+toc_maxdepth = 4
+
+[tool.pydoc-markdown.renderer.header_level_by_type]
+Module = 2
+Class = 2
+Method = 3
+Function = 3
+Data = 3

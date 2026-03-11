@@ -1,0 +1,5 @@
+dynamixel_sdk
+numpy==1.26.4
+pyserial
+pydoc-markdown
+
