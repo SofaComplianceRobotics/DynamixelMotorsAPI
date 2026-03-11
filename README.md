@@ -6,7 +6,7 @@ Robot Motors API is a simple and easy-to-use API for controling the Robot Motors
 To install the Robot Motors API, you can use pip:
 
 ```bash
-python -m pip install git+https://github.com/SofaComplianceRobotics/Robot Motors.API.git@release-main
+python -m pip install git+https://github.com/SofaComplianceRobotics/DynamixelMotors.git@release-main
 ```
 
 ## Usage
