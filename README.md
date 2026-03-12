@@ -42,6 +42,27 @@ if robot_motors.open():
 
 ```
 
+By default, there are four motors with IDS 0, 1, 2, and 3. You can change this in the [_dynamixelmotorsparameters.py](dynamixelmotorsapi/_dynamixelmotorsparameters.py) at line 21:
+
+``` python
+21 |    DXL_IDs = (0, 1, 2, 3)
+```
+
+To change the motors parameters based on your motors, like the addresses and values, you can also change them into the file [_dynamixelmotorsparameters.py](dynamixelmotorsapi/_dynamixelmotorsparameters.py) if needed.
+
+The parameters already include some Dynamixel motor series so you can easily switch by commenting and uncommenting the right line:
+```python
+ 4 |    #***** (Use only one definition at a time) *****
+ 5 |    MY_DXL = 'X_SERIES'       # X330 (5.0 V recommended), X430, X540, 2X430
+ 6 |    # MY_DXL = 'MX_SERIES'    # MX series with 2.0 firmware update.
+ 7 |    # MY_DXL = 'PRO_SERIES'   # H54, H42, M54, M42, L54, L42
+ 8 |    # MY_DXL = 'PRO_A_SERIES' # PRO series with (A) firmware update.
+ 9 |    # MY_DXL = 'P_SERIES'     # PH54, PH42, PM54
+10 |    # MY_DXL = 'XL320'        # [WARNING] Operating Voltage : 7.4V
+```
+
+⚠️ For now, the API assumes that all the motors are the same
+
 ## For Developers
 The documentation is generated using [pydoc-markdown](https://pypi.org/project/pydoc-markdown/). To generate the documentation, you need to install `pydoc-markdown`:
 
