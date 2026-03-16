@@ -1,9 +1,19 @@
 import ctypes
+from threading import Lock
+from math import pi
+from typing import List, Dict
+from itertools import groupby
+
+import serial.tools.list_ports as list_ports
 
 from dynamixel_sdk import *
 
-import dynamixelmotorsapi._dynamixelmotorsparameters as MotorsParametersTemplate
+from dynamixelmotorsapi._dynamixelmotorsparameters import (
+    MotorConfig, ModelConfig, PROTOCOL_VERSION, BAUDRATE,
+    TORQUE_ENABLE, TORQUE_DISABLE, VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE
+)
 from dynamixelmotorsapi._logging_config import logger
+
 
 def listMotors():
     """
@@ -23,62 +33,60 @@ def listMotors():
         elif p.serial_number is not None and "FTDI" in p.serial_number:
             ports.append(p.device)
 
-    if ports is None or len(ports) == 0:
+    if not ports:
         logger.warning("No motor found. Please check the connection.")
-        return ports
 
     return ports
 
 
 def getDevicePort(entry, method="manufacturer"):
-        """
-        Get the device port based on the device name and method. This will get the first FTDI device found.
-
-        Args:
-            entry (str): The name of the device to search for.
-            method (str): The method to use for searching (default is "manufacturer").
-        Returns:
-            The first port of the device if found, otherwise None.
-        """
-        ports = []
-        comports = serial.tools.list_ports.comports()
-
-        if comports is None or len(comports) == 0:
-            logger.error("Serial ports check failed, list of ports is empty.")
-            return
-
-        if method == "manufacturer":
-            ports = [p for p in comports if p.manufacturer is not None and entry in p.manufacturer]
-        if method == "description":
-            ports = [p for p in comports if p.description is not None and entry in p.description]
-        if method == "serial_number":
-            ports = [p for p in comports if p.serial_number is not None and entry in p.serial_number]
-
-        if not ports:
-            logger.error("No serial port found with " + method + " = " + entry)
-            return
-
-        if len(ports) > 1:
-            logger.warning("Multiple port found with " + method + " = " + entry + ". Using the first.")
-
-        logger.debug("Found port with " + method + " = " + entry + ": \n" +
-                    "device : " + ports[0].device + "\n" +
-                    "manufacturer : " + ports[0].manufacturer + "\n" +
-                    "description : " + ports[0].description + "\n" +
-                    "serial number : " + ports[0].serial_number
-                    )
-        return ports[0].device
-
-
-def _valToArray( val):
-    """Convert a 32-bit integer to a list of 4 bytes.
-    Args:
-        val (int): The 32-bit integer to convert.
-    Returns:
-        list of bytes: The list of 4 bytes representing the integer.
     """
-    return [DXL_LOBYTE(DXL_LOWORD(val)), DXL_HIBYTE(DXL_LOWORD(val)), DXL_LOBYTE(DXL_HIWORD(val)),
-            DXL_HIBYTE(DXL_HIWORD(val))]
+    Get the device port based on the device name and method.
+
+    Args:
+        entry (str): The name of the device to search for.
+        method (str): The method to use for searching (default is "manufacturer").
+
+    Returns:
+        The first port of the device if found, otherwise None.
+    """
+    comports = serial.tools.list_ports.comports()
+
+    if not comports:
+        logger.error("Serial ports check failed, list of ports is empty.")
+        return None
+
+    if method == "manufacturer":
+        ports = [p for p in comports if p.manufacturer is not None and entry in p.manufacturer]
+    elif method == "description":
+        ports = [p for p in comports if p.description is not None and entry in p.description]
+    elif method == "serial_number":
+        ports = [p for p in comports if p.serial_number is not None and entry in p.serial_number]
+    else:
+        ports = []
+
+    if not ports:
+        logger.error(f"No serial port found with {method} = {entry}")
+        return None
+
+    if len(ports) > 1:
+        logger.warning(f"Multiple ports found with {method} = {entry}. Using the first.")
+
+    p = ports[0]
+    logger.debug(
+        f"Found port with {method} = {entry}:\n"
+        f"  device:        {p.device}\n"
+        f"  manufacturer:  {p.manufacturer}\n"
+        f"  description:   {p.description}\n"
+        f"  serial number: {p.serial_number}"
+    )
+    return p.device
+
+
+def _valToArray(val):
+    """Convert a 32-bit integer to a list of 4 bytes."""
+    return [DXL_LOBYTE(DXL_LOWORD(val)), DXL_HIBYTE(DXL_LOWORD(val)),
+            DXL_LOBYTE(DXL_HIWORD(val)), DXL_HIBYTE(DXL_HIWORD(val))]
 
 
 def _valTo2Bytes(val):
@@ -87,434 +95,427 @@ def _valTo2Bytes(val):
 
 
 class DisconnectedException(Exception):
-    """Custom exception for disconnected motors."""
+    """Raised when an operation is attempted on a disconnected motor group."""
     def __init__(self):
-        message = "MotorGroup is not connected. It is either disconnected or permission denied."
-        super().__init__(message)
+        super().__init__(
+            "MotorGroup is not connected. It is either disconnected or permission denied."
+        )
+
 
 class MotorGroup:
+    """
+    Controls a group of Dynamixel motors, supporting heterogeneous models.
 
-    def __init__(self, parameters: MotorsParametersTemplate) -> None:
+    Motors are grouped internally by models so that GroupSyncRead/Write —
+    which require a uniform address and data length — operate correctly even
+    when motors from different models (with different register maps) are mixed.
 
-        self.parameters = parameters
+    All public read methods return values ordered by the original motor_configs
+    list, regardless of internal grouping.
+    """
+
+    def __init__(self, motor_configs: List[MotorConfig]) -> None:
+        self.motorsConfig = motor_configs
         self.deviceName = None
 
-        self.packetHandler = PacketHandler(self.parameters.PROTOCOL_VERSION)
+        self.packetHandler = PacketHandler(PROTOCOL_VERSION)
         self.portHandler = PortHandler(self.deviceName)
 
-        self.groupReaders = {}
-        self.groupWriters = {}
+        # Group motors by models so each GroupSyncRead/Write uses a consistent
+        # address and length. Dict key is model name, value is list of MotorConfigs.
+        self._models_groups: Dict[str, List[MotorConfig]] = {}
+        for cfg in motor_configs:
+            self._models_groups.setdefault(cfg.model, []).append(cfg)
 
-        self.groupReaders["position"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                        self.parameters.ADDR_PRESENT_POSITION,
-                                                        self.parameters.LEN_PRESENT_POSITION)
-        self.groupReaders["velocity"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                       self.parameters.ADDR_PRESENT_VELOCITY,
-                                                       self.parameters.LEN_PRESENT_VELOCITY)
-        self.groupReaders["goal_position"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_GOAL_POSITION,
-                                                            self.parameters.LEN_GOAL_POSITION)
-        self.groupReaders["goal_velocity"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                        self.parameters.ADDR_GOAL_VELOCITY,
-                                                        self.parameters.LEN_GOAL_VELOCITY)
-        self.groupReaders["moving"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                         self.parameters.ADDR_MOVING,
-                                                         1)
-        self.groupReaders["moving_status"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_MOVING_STATUS,
-                                                            1)
-        self.groupReaders["velocity_trajectory"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_VELOCITY_TRAJECTORY,
-                                                            self.parameters.LEN_VELOCITY_TRAJECTORY)
-        self.groupReaders["position_trajectory"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_POSITION_TRAJECTORY,
-                                                            self.parameters.LEN_POSITION_TRAJECTORY)
-        self.groupReaders["position_p_gain"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_P_GAIN,
-                                                                self.parameters.LEN_POSITION_P_GAIN)
-        self.groupReaders["position_i_gain"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_I_GAIN,
-                                                                self.parameters.LEN_POSITION_I_GAIN)
-        self.groupReaders["position_d_gain"] = GroupSyncRead(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_D_GAIN,
-                                                                self.parameters.LEN_POSITION_D_GAIN)
+        # Per-models sync read/write groups: {model_name: {reader_name: GroupSyncRead}}
+        self.groupReaders: Dict[str, Dict[str, GroupSyncRead]] = {}
+        self.groupWriters: Dict[str, Dict[str, GroupSyncWrite]] = {}
 
-        self.groupWriters["goal_position"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_GOAL_POSITION,
-                                                            self.parameters.LEN_GOAL_POSITION)
-        self.groupWriters["goal_velocity"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                            self.parameters.ADDR_GOAL_VELOCITY,
-                                                            self.parameters.LEN_GOAL_POSITION)
-        self.groupWriters["velocity_profile"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_VELOCITY_PROFILE,
-                                                                self.parameters.LEN_GOAL_POSITION)
-        self.groupWriters["position_p_gain"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_P_GAIN,
-                                                                self.parameters.LEN_POSITION_P_GAIN)
-        self.groupWriters["position_i_gain"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_I_GAIN,
-                                                                self.parameters.LEN_POSITION_I_GAIN)
-        self.groupWriters["position_d_gain"] = GroupSyncWrite(self.portHandler, self.packetHandler,
-                                                                self.parameters.ADDR_POSITION_D_GAIN,
-                                                                self.parameters.LEN_POSITION_D_GAIN)
+        self._initGroups()
 
-        for DXL_ID in self.parameters.DXL_IDs:
-            for group in self.groupReaders.values():
-                group.addParam(DXL_ID)
+    # ------------------------------------------------------------------ #
+    #  Initialisation helpers                                              #
+    # ------------------------------------------------------------------ #
 
+    def _initGroups(self):
+        """Create GroupSyncRead/Write objects for each models."""
+        for model_name, configs in self._models_groups.items():
+            sc: ModelConfig = configs[0].model_config  # all share the same ModelConfig
+
+            readers = {
+                "position": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_present_position, sc.len_present_position),
+                "velocity": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_present_velocity, sc.len_present_velocity),
+                "goal_position": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_goal_position, sc.len_goal_position),
+                "goal_velocity": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_goal_velocity, sc.len_goal_velocity),
+                "moving": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_moving, 1),
+                "moving_status": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_moving_status, 1),
+                "velocity_trajectory": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_velocity_trajectory, sc.len_velocity_trajectory),
+                "position_trajectory": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_trajectory, sc.len_position_trajectory),
+                "position_p_gain": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_p_gain, sc.len_position_p_gain),
+                "position_i_gain": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_i_gain, sc.len_position_i_gain),
+                "position_d_gain": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_d_gain, sc.len_position_d_gain),
+            }
+
+            writers = {
+                "goal_position": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_goal_position, sc.len_goal_position),
+                "goal_velocity": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_goal_velocity, sc.len_goal_velocity),
+                "velocity_profile": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_velocity_profile, sc.len_goal_velocity),
+                "position_p_gain": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_p_gain, sc.len_position_p_gain),
+                "position_i_gain": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_i_gain, sc.len_position_i_gain),
+                "position_d_gain": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_position_d_gain, sc.len_position_d_gain),
+            }
+
+            # Register all motor IDs in this model with every reader
+            for cfg in configs:
+                for reader in readers.values():
+                    reader.addParam(cfg.id)
+
+            self.groupReaders[model_name] = readers
+            self.groupWriters[model_name] = writers
+            
+
+    def _updateGroups(self):
+        """Propagate the new portHandler to all sync groups after reconnection."""
+        for readers in self.groupReaders.values():
+            for group in readers.values():
+                group.port = self.portHandler
+                group.ph = self.packetHandler
+        for writers in self.groupWriters.values():
+            for group in writers.values():
+                group.port = self.portHandler
+                group.ph = self.packetHandler
+
+    # ------------------------------------------------------------------ #
+    #  Connection management                                               #
+    # ------------------------------------------------------------------ #
 
     @property
     def isConnected(self):
         """Check if the motor group is connected."""
         try:
-            if self.portHandler and self.portHandler.is_open  and self._isDeviceDetected():
-                return True
+            return bool(self.portHandler and self.portHandler.is_open and self._isDeviceDetected())
         except Exception as e:
             logger.exception(f"Failed to check connection: {e}")
             return False
         
-
-    def _updateGroups(self):
-        """
-        Update the port handler with the new device name.
-        """
-        for group in self.groupReaders.values():
-            group.port = self.portHandler
-            group.ph = self.packetHandler
-
-        for group in self.groupWriters.values():
-            group.port = self.portHandler
-            group.ph = self.packetHandler
-
-
-    def updateDeviceName(self, device_name: str=None):
-        """
-        Update the device name based on the available ports. This will get the first FTDI device found if no device name is provided.
-        If no device is found, the device name will be None.
-        """
-        self.deviceName = device_name  if device_name is not None else getDevicePort("FTDI", method="manufacturer")
-        self.portHandler = PortHandler(self.deviceName)
-        self._updateGroups()
-
-        logger.debug(f"Device name updated to: {self.deviceName}")
-
-        return
-    
 
     def _isDeviceDetected(self):
         for port in serial.tools.list_ports.comports():
             if port.device == self.deviceName:
                 return True
         return False
+    
 
-
-    def _readSyncMotorsData(self, groupSyncRead:GroupSyncRead):
-        """Read data from the motor.
-
-        Args:
-            DXL_ID (int): The ID of the motor.
-            addr (int): The address to read from.
-            length (int): The length of the data to read.
-
-        Returns:
-            int: The value read from the motor.
-
-        Raises:
-            Exception: If the motor group is not connected or if the read operation fails.
+    def updateDeviceName(self, device_name: str = None):
         """
+        Update the device name. If not provided, uses the first FTDI device found.
+        """
+        self.deviceName = device_name if device_name is not None else getDevicePort("FTDI")
+        self.portHandler = PortHandler(self.deviceName)
+        self._updateGroups()
+        logger.debug(f"Device name updated to: {self.deviceName}")
+
+
+    def open(self) -> None:
+        """Open the port and set the baud rate."""
+        try:
+            self.portHandler.openPort()
+            self.portHandler.setBaudRate(BAUDRATE)
+        except Exception as e:
+            raise Exception(f"Failed to open port: {e}")
+        
+
+    def close(self) -> None:
+        """Disable torque on all motors and close the port."""
+        try:
+            for cfg in self.motorsConfig:
+                self.packetHandler.write1ByteTxRx(
+                    self.portHandler, cfg.id,
+                    cfg.model_config.addr_torque_enable, TORQUE_DISABLE
+                )
+            self.portHandler.closePort()
+            self.deviceName = None
+        except Exception as e:
+            raise Exception(f"Failed to close port: {e}")
+        
+
+    def clearPort(self) -> None:
+        """Clear the port buffer."""
         if not self.isConnected:
             raise DisconnectedException()
+        if self.portHandler:
+            self.portHandler.clearPort()
 
-        dxl_comm_result = groupSyncRead.txRxPacket()
-        if dxl_comm_result != COMM_SUCCESS:
-            raise Exception(f"Failed to read data from motor: {self.packetHandler.getTxRxResult(dxl_comm_result)}")
-        result = list()
+    # ------------------------------------------------------------------ #
+    #  Torque and operating mode                                           #
+    # ------------------------------------------------------------------ #
 
-        for DXL_ID in self.parameters.DXL_IDs:
-            dxl_getdata_result = groupSyncRead.isAvailable(DXL_ID, groupSyncRead.start_address, groupSyncRead.data_length)
-            if dxl_getdata_result != True:
-                return None
-            angle = ctypes.c_int(groupSyncRead.getData(DXL_ID, groupSyncRead.start_address, groupSyncRead.data_length))
-            result.append(angle.value)
+    def enableTorque(self):
+        """Enable torque on all motors."""
+        self._write1ByteAll(
+            lambda cfg: cfg.model_config.model.addr_torque_enable, TORQUE_ENABLE
+        )
 
+
+    def disableTorque(self):
+        """Disable torque on all motors."""
+        self._write1ByteAll(
+            lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_DISABLE
+        )
+
+
+    def isTorqueEnable(self) -> list:
+        """Return the torque enable state for each motor."""
+        result = []
+        for cfg in self.motorsConfig:
+            torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
+                self.portHandler, cfg.id, cfg.model_config.addr_torque_enable
+            )
+            if dxl_comm_result != COMM_SUCCESS:
+                raise Exception(f"Failed to read torque (motor {cfg.id}): "
+                                f"{self.packetHandler.getTxRxResult(dxl_comm_result)}")
+            if dxl_error != 0:
+                raise Exception(f"Failed to read torque (motor {cfg.id}): "
+                                f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            result.append(torque)
         return result
     
 
-    def __writeSyncMotorsData(self, group: GroupSyncWrite, values):
-        """Helper function to write data to the motors.
+    def __setOperatingMode(self, mode: int):
+        """
+        Set the operating mode on all motors.
+
         Args:
-            group (GroupSyncWrite): The group sync write object.
-            values (list of numbers): The values to write to the motors.
+            mode: 1=Velocity, 3=Position, 4=Extended Position.
+                  See https://emanual.robotis.com/docs/en/dxl/x/xc330-t288/#operating-mode
         """
         if not self.isConnected:
             raise DisconnectedException()
-
-        group.clearParam()
-        for index, DXL_ID in enumerate(self.parameters.DXL_IDs):
-            if group.data_length == 2:
-                data = _valTo2Bytes(values[index])
-            elif group.data_length == 4:
-                data = _valToArray(values[index])
-            else:
-                raise Exception(f"Unsupported data length: {group.data_length}")
-            group.addParam(DXL_ID, data)
-        group.txPacket()
-
-    
-    def __write1Byte(self, paramAddress, paramValue):
-        if not self.isConnected:
-            raise DisconnectedException()
-        
-        for DXL_ID in self.parameters.DXL_IDs:
-                dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, DXL_ID, paramAddress, paramValue)
-                if dxl_comm_result != COMM_SUCCESS:
-                   raise Exception(f"Failed to change operating mode: {self.packetHandler.getTxRxResult(dxl_comm_result)}")
-                elif dxl_error != 0:
-                     raise Exception(f"Failed to change operating mode: {self.packetHandler.getTxRxResult(dxl_error)}")
-                else:
-                    logger.debug("Motor Data %s changed to %s (%s,%s)" % (paramAddress, paramValue, self.deviceName, DXL_ID))
-
-
-    def __setOperatingMode(self, mode):
-        """Set the operating mode of the motors.
-        Args:
-            mode (int): The operating mode to set.
-                0: Current Control Mode
-                1: Velocity Control Mode
-                3: (Default) Position Control Mode
-                4: Extended Position Control Mode
-                5: Current-bqsed Position Control Mode
-                16: PWM Control Mode
-
-                See https://emanual.robotis.com/docs/en/dxl/x/xc330-t288/#operating-mode for more details.
-        """
-        if not self.isConnected:
-            raise DisconnectedException()
-        
-        self.__write1Byte(self.parameters.ADDR_OPERATING_MODE, mode)
-
+        self._write1ByteAll(lambda cfg: cfg.model_config.addr_operating_mode, mode)
 
 
     def enableVelocityMode(self):
         torques = self.isTorqueEnable()
-
-        if any(t==1 for t in torques):
+        if any(t == 1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(self.parameters.VELOCITY_MODE)
-        if any(t==1 for t in torques):
-            self.enableTorque()
-
-
-    def enableExtendedPositionMode(self):
-        torques = self.isTorqueEnable()
-
-        if any(t==1 for t in torques):
-            self.disableTorque()
-        self.__setOperatingMode(self.parameters.EXT_POSITION_MODE)
-        if any(t==1 for t in torques):
+        self.__setOperatingMode(VELOCITY_MODE)
+        if any(t == 1 for t in torques):
             self.enableTorque()
 
 
     def enablePositionMode(self):
         torques = self.isTorqueEnable()
-
-        if any(t==1 for t in torques):
+        if any(t == 1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(self.parameters.POSITION_MODE)
-        if any(t==1 for t in torques):
+        self.__setOperatingMode(POSITION_MODE)
+        if any(t == 1 for t in torques):
             self.enableTorque()
 
 
-    def setGoalVelocity(self, speeds):
-        """Set the goal velocity
+    def enableExtendedPositionMode(self):
+        torques = self.isTorqueEnable()
+        if any(t == 1 for t in torques):
+            self.disableTorque()
+        self.__setOperatingMode(EXT_POSITION_MODE)
+        if any(t == 1 for t in torques):
+            self.enableTorque()
+
+    # ------------------------------------------------------------------ #
+    #  Low-level read / write helpers                                      #
+    # ------------------------------------------------------------------ #
+
+    def _write1ByteAll(self, addr_fn, value: int):
+        """
+        Write a single byte to all motors, using each motor's own address.
 
         Args:
-            speeds (list of numbers): unit depends on motor type
+            addr_fn: callable(MotorConfig) -> int, returns the register address for that motor.
+            value:   the byte value to write.
         """
-        self.__writeSyncMotorsData(self.groupWriters["goal_velocity"] , speeds)
-
-
-    def setGoalPosition(self, positions):
-        """Set the goal position
-
-        Args:
-            positions (list of numbers): unit = 1 pulse
-        """
-        self.__writeSyncMotorsData(self.groupWriters["goal_position"], positions)
-
-
-    def setVelocityProfile(self, max_vel):
-        """Set the maximum velocities in position mode
-
-        Args:
-            positions (list of numbers): unit depends on the motor type
-        """
-        self.__writeSyncMotorsData(self.groupWriters["velocity_profile"], max_vel)
-
-
-    def setPositionPGain(self, p_gains):
-        """Set the position P gains
-
-        Args:
-            p_gains (list of numbers): unit depends on the motor type
-        """
-        self.__writeSyncMotorsData(self.groupWriters["position_p_gain"], p_gains)
-
-
-    def setPositionIGain(self, i_gains):
-        """Set the position I gains
-
-        Args:
-            i_gains (list of numbers): unit depends on the motor type
-        """
-        self.__writeSyncMotorsData(self.groupWriters["position_i_gain"], i_gains)
-
-
-    def setPositionDGain(self, d_gains):
-        """Set the position D gains
-
-        Args:
-            d_gains (list of numbers): unit depends on the motor type
-        """
-        self.__writeSyncMotorsData(self.groupWriters["position_d_gain"], d_gains)
-
-
-    def getCurrentPosition(self) -> list:
-        """Get the current position of the motors
-        Returns:
-            list of numbers: unit = 1 pulse
-        """
-        return self._readSyncMotorsData(self.groupReaders["position"])
-
-
-    def getGoalPosition(self) -> list:
-        """Get the goal position of the motors
-        Returns:
-            list of numbers: unit = 1 pulse
-        """
-        return self._readSyncMotorsData(self.groupReaders["goal_position"])
-
-    def getGoalVelocity(self) -> list:
-        """Get the goal velocity of the motors
-        Returns:
-            list of velocities: unit is rev/min
-        """
-        return self._readSyncMotorsData(self.groupReaders["goal_velocity"])
-
-
-    def getCurrentVelocity(self) -> list:
-        """Get the current velocity of the motors
-        Returns:
-            list of velocities: unit is rev/min
-        """
-        return self._readSyncMotorsData(self.groupReaders["velocity"])
-
-
-    def isMoving(self) -> list:
-        """Check if the motors are moving
-        Returns:
-            list of booleans: True if the motor is moving, False otherwise
-        """
-        return self._readSyncMotorsData(self.groupReaders["moving"])
-
-
-    def getMovingStatus(self) -> list:
-        """Get the moving status of the motors
-        Returns:
-            list of booleans: True if the motor is moving, False otherwise
-        """
-        return self._readSyncMotorsData(self.groupReaders["moving_status"])
-
-
-    def getVelocityTrajectory(self) -> list:
-        """Get the velocity trajectory of the motors
-        Returns:
-            list of velocities: unit is rev/min
-        """
-        return self._readSyncMotorsData(self.groupReaders["velocity_trajectory"])
-
-
-    def getPositionTrajectory(self) -> list:
-        """Get the position trajectory of the motors
-        Returns:
-            list of positions: unit = 1 pulse
-        """
-        return self._readSyncMotorsData(self.groupReaders["position_trajectory"])
-
-
-    def getPositionPGain(self) -> list:
-        """Get the position P gains of the motors
-        Returns:
-            list of P gains: unit depends on the motor type
-        """
-        return self._readSyncMotorsData(self.groupReaders["position_p_gain"])
-
-
-    def getPositionIGain(self) -> list:
-        """Get the position I gains of the motors
-        Returns:
-            list of I gains: unit depends on the motor type
-        """
-        return self._readSyncMotorsData(self.groupReaders["position_i_gain"])
-
-
-    def getPositionDGain(self) -> list:
-        """Get the position D gains of the motors
-        Returns:
-            list of D gains: unit depends on the motor type
-        """
-        return self._readSyncMotorsData(self.groupReaders["position_d_gain"])
-
-
-    def open(self) -> None:
-        """Open the port and set the baud rate.
-        Raises:
-            Exception: If the port cannot be opened or the baud rate cannot be set.
-        """
-        try:
-            self.portHandler.openPort()
-            self.portHandler.setBaudRate(self.parameters.BAUDRATE)
-        except Exception as e:
-            raise Exception(f"Failed to open port: {e}")
-
-
-    def enableTorque(self):
-        """Enable the torque of the motors."""
-        self.__write1Byte(self.parameters.ADDR_TORQUE_ENABLE, self.parameters.TORQUE_ENABLE)
-            
-
-    def disableTorque(self):
-        """Disable the torque of the motors."""        
-        self.__write1Byte(self.parameters.ADDR_TORQUE_ENABLE, self.parameters.TORQUE_DISABLE)
-
-
-    def isTorqueEnable(self):
-        torques = []
-        for DXL_ID in self.parameters.DXL_IDs:
-            torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(self.portHandler, DXL_ID, self.parameters.ADDR_TORQUE_ENABLE)
+        if not self.isConnected:
+            raise DisconnectedException()
+        for cfg in self.motorsConfig:
+            addr = addr_fn(cfg)
+            dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
+                self.portHandler, cfg.id, addr, value
+            )
             if dxl_comm_result != COMM_SUCCESS:
-                   raise Exception(f"Failed to read torque: {self.packetHandler.getTxRxResult(dxl_comm_result)}")
-            elif dxl_error != 0:
-                     raise Exception(f"Failed to read torque: {self.packetHandler.getTxRxResult(dxl_error)}")
-            torques.append(torque)
-        return torques
-    
+                raise Exception(f"Failed to write byte to motor {cfg.id} at addr {addr}: "
+                                f"{self.packetHandler.getTxRxResult(dxl_comm_result)}")
+            if dxl_error != 0:
+                raise Exception(f"Error on motor {cfg.id} at addr {addr}: "
+                                f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            logger.debug(f"Motor {cfg.id}: addr {addr} set to {value}")
 
-    def close(self) -> None:
-        """Close the port and disable the torque of the motors."""
-        try:
-            for DXL_ID in self.parameters.DXL_IDs:
-                self.packetHandler.write1ByteTxRx(self.portHandler, DXL_ID, self.parameters.ADDR_TORQUE_ENABLE,
-                                                  self.parameters.TORQUE_DISABLE)
-            self.portHandler.closePort()
-            self.deviceName = None
-        except Exception as e:
-            raise Exception(f"Failed to close port: {e}")
 
-    def clearPort(self) -> None:
-        """Clear the port."""
+    def _readSyncMotorsData(self, reader_name: str) -> list:
+        """
+        Read data from all motors using GroupSyncRead, per model, and return
+        results in the original motor_configs order.
+
+        Args:
+            reader_name: key into self.groupReaders[model].
+
+        Returns:
+            List of values in motor_configs order.
+        """
         if not self.isConnected:
             raise DisconnectedException()
 
-        if self.portHandler:
-            self.portHandler.clearPort()
+        # Collect results keyed by motor ID across all models
+        results_by_id = {}
+        for model_name, readers in self.groupReaders.items():
+            group = readers[reader_name]
+            dxl_comm_result = group.txRxPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                raise Exception(
+                    f"Failed to read '{reader_name}' for model '{model_name}': "
+                    f"{self.packetHandler.getTxRxResult(dxl_comm_result)}"
+                )
+            for cfg in self._models_groups[model_name]:
+                if not group.isAvailable(cfg.id, group.start_address, group.data_length):
+                    raise Exception(
+                        f"Data not available for motor {cfg.id} (model '{model_name}', "
+                        f"reader '{reader_name}')"
+                    )
+                raw = group.getData(cfg.id, group.start_address, group.data_length)
+                results_by_id[cfg.id] = ctypes.c_int(raw).value
+
+        # Return in original motor_configs order
+        return [results_by_id[cfg.id] for cfg in self.motorsConfig]
+    
+
+    def __writeSyncMotorsData(self, writer_name: str, values: list):
+        """
+        Write data to all motors using GroupSyncWrite, per models.
+
+        Args:
+            writer_name: key into self.groupWriters[model].
+            values:      list of values in motor_configs order.
+        """
+        if not self.isConnected:
+            raise DisconnectedException()
+
+        # Map motor ID -> value from the ordered values list
+        values_by_id = {cfg.id: values[i] for i, cfg in enumerate(self.motorsConfig)}
+
+        for model_name, writers in self.groupWriters.items(): # iterate through motor models in groupwriters
+            group = writers[writer_name]
+            group.clearParam()
+            for cfg in self._models_groups[model_name]: # get the MotorConfigs for model model_name
+                val = values_by_id[cfg.id]
+                if group.data_length == 2:
+                    data = _valTo2Bytes(val)
+                elif group.data_length == 4:
+                    data = _valToArray(val)
+                else:
+                    raise Exception(f"Unsupported data length: {group.data_length}")
+                group.addParam(cfg.id, data)
+            group.txPacket()
+
+
+    # ------------------------------------------------------------------ #
+    #  Public read / write API                                             #
+    # ------------------------------------------------------------------ #
+
+    def setGoalPosition(self, positions: list):
+        """Set the goal position (pulses) for each motor."""
+        self.__writeSyncMotorsData("goal_position", positions)
+
+    def setGoalVelocity(self, speeds: list):
+        """Set the goal velocity for each motor."""
+        self.__writeSyncMotorsData("goal_velocity", speeds)
+
+    def setVelocityProfile(self, max_vel: list):
+        """Set the maximum velocity profile (position mode) for each motor."""
+        self.__writeSyncMotorsData("velocity_profile", max_vel)
+
+    def setPositionPGain(self, p_gains: list):
+        """Set the position P gain for each motor."""
+        self.__writeSyncMotorsData("position_p_gain", p_gains)
+
+    def setPositionIGain(self, i_gains: list):
+        """Set the position I gain for each motor."""
+        self.__writeSyncMotorsData("position_i_gain", i_gains)
+
+    def setPositionDGain(self, d_gains: list):
+        """Set the position D gain for each motor."""
+        self.__writeSyncMotorsData("position_d_gain", d_gains)
+
+    def getCurrentPosition(self) -> list:
+        """Get the current position (pulses) for each motor."""
+        return self._readSyncMotorsData("position")
+
+    def getGoalPosition(self) -> list:
+        """Get the goal position (pulses) for each motor."""
+        return self._readSyncMotorsData("goal_position")
+
+    def getGoalVelocity(self) -> list:
+        """Get the goal velocity for each motor."""
+        return self._readSyncMotorsData("goal_velocity")
+
+    def getCurrentVelocity(self) -> list:
+        """Get the current velocity for each motor."""
+        return self._readSyncMotorsData("velocity")
+
+    def isMoving(self) -> list:
+        """Return True for each motor that is currently moving."""
+        return self._readSyncMotorsData("moving")
+
+    def getMovingStatus(self) -> list:
+        """Get the moving status byte for each motor."""
+        return self._readSyncMotorsData("moving_status")
+
+    def getVelocityTrajectory(self) -> list:
+        """Get the velocity trajectory for each motor."""
+        return self._readSyncMotorsData("velocity_trajectory")
+
+    def getPositionTrajectory(self) -> list:
+        """Get the position trajectory for each motor."""
+        return self._readSyncMotorsData("position_trajectory")
+
+    def getPositionPGain(self) -> list:
+        """Get the position P gain for each motor."""
+        return self._readSyncMotorsData("position_p_gain")
+
+    def getPositionIGain(self) -> list:
+        """Get the position I gain for each motor."""
+        return self._readSyncMotorsData("position_i_gain")
+
+    def getPositionDGain(self) -> list:
+        """Get the position D gain for each motor."""
+        return self._readSyncMotorsData("position_d_gain")

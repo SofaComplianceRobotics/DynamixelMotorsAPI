@@ -9,8 +9,10 @@ requires-python = ">=3.10"
 readme = "README.md"
 dependencies = [
     "pyserial",
- "dynamixel_sdk",
- "numpy==1.26.4",
+    "dynamixel_sdk",
+    "numpy==1.26.4",
+    "requests",
+    "beautifulsoup4>=4.7.0",
 ]
 description = "An API for controlling  the motors of a group of Dynamixel motors."
 keywords = ["robotics", "api", "dynamixel"]

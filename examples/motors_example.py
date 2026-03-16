@@ -8,24 +8,13 @@ from math import pi
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/..')
 from dynamixelmotorsapi import DynamixelMotors
-from dynamixelmotorsapi._dynamixelmotorsparameters import DXL_IDs
 from dynamixelmotorsapi._logging_config import logger
 
 
-class MyDynamixelMotors(DynamixelMotors):
-    _length_to_rad = 1.0 / 20.0  # 1/radius of the pulley
-    _rad_to_pulse = 4096 / (2 * pi)  # the resolution of the Dynamixel xm430 w210
-    _pulse_center= 2048
-    _max_vel = 1000  # *0.01 rev/min
-
-    def __init__(self):
-        super().__init__() # Check if all parameters have been set
-
-
 def main(robot_motors: DynamixelMotors, loops=1):
-
-    initial_pos_pulse = [0] * len(DXL_IDs)
-    robot_motors.max_velocity = [1000] * len(DXL_IDs)
+    motors_count = robot_motors._motor_configs
+    initial_pos_pulse = [0] * len(motors_count)
+    robot_motors.max_velocity = [1000] * len(motors_count)
     logger.info(f"Initial position in rad: {initial_pos_pulse}")
     robot_motors.angles = initial_pos_pulse
     time.sleep(1)
@@ -33,7 +22,7 @@ def main(robot_motors: DynamixelMotors, loops=1):
 
 
     for i in range(loops):
-        new_pos = [((2*3.14)*((i+1)%8)/8)] * len(DXL_IDs)
+        new_pos = [((2*3.14)*((i+1)%8)/8)] * len(motors_count)
         print("-"*20)
         logger.info(f"new_pos {new_pos}")
         try:
@@ -54,8 +43,17 @@ if __name__ == "__main__":
     try:
         logger.info("Starting DynamixelMotors API test...")
         logger.info("Opening and configuring Robot Motors API...")
+
+        motors_description = [{
+            "id": 0,
+            "model": "XM430-W210",
+            "length_to_rad": 0.05,
+            "pulse_center": 2048,
+            "max_vel": 1000
+        }
+        ]
         
-        robot_motors = MyDynamixelMotors()
+        robot_motors = DynamixelMotors.from_dict(motors_description)
         
         if robot_motors.open(): 
             
