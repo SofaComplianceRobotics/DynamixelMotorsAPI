@@ -1,9 +1,6 @@
 name: Scrape Dynamixel Motors ⛏
 
 on:
-  push:
-    paths:
-      - 'data/projects.json'       # runs when you update the URL list
   workflow_dispatch:
 
 jobs:
