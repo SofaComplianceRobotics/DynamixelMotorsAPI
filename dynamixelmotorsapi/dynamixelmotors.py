@@ -96,9 +96,14 @@ class DynamixelMotors:
             self._mg = motorgroup.MotorGroup(motor_configs)
             self._initialized = True
 
+    @staticmethod
+    def listMotorsModels() -> list:
+        """List the models of Dynamixel motors supported by this API."""
+        return list(MODELS_CONFIGS.keys())
+
 
     @classmethod
-    def unwrap_dict(cls, data: dict) -> List[MotorConfig]:
+    def __unwrap_dict(cls, data: dict) -> List[MotorConfig]:
         """Helper function to convert a dict of motor configs into a list of dicts, one per motor."""
         if isinstance(data["id"], list):
             motors_count = len(data["id"])
@@ -145,7 +150,7 @@ class DynamixelMotors:
         """
         dicts = []
         for d in data:
-            dicts.extend(cls.unwrap_dict(d))
+            dicts.extend(cls.__unwrap_dict(d))
         motor_configs = [MotorConfig.from_dict(m) for m in dicts]
         return cls(motor_configs)
     
@@ -182,7 +187,7 @@ class DynamixelMotors:
         }
         ```
         """
-        motor_dicts = cls.unwrap_dict(data)
+        motor_dicts = cls.__unwrap_dict(data)
         return  cls([MotorConfig.from_dict(m) for m in motor_dicts])
 
 
