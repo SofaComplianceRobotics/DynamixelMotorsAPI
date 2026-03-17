@@ -14,22 +14,22 @@ The Dynamixel Motors API provides the `DynamixelMotors` class, which can be used
 You can look at the [motors_example.py](motors_example.py) file for a simple example of how to use the API to control the motors of the motors.
 
 
-Simple example thaht sets the angles of the motors to 0 radians, waits for 1 second, and then prints the status of the robot:
+Simple example thaht sets the angles of 4 *XM430-W210* motors to 0 radians, waits for 1 second, and then prints the status of the robot:
 ```python
 import time
 from dynamixelmotorsapi import DynamixelMotors
 
-# Define your own class of motors that inherits DynamixelMotors class
-class MyDynamixelMotors(DynamixelMotors):
-    _length_to_rad = 1.0 / 20.0  # 1/radius of the pulley
-    _rad_to_pulse = 4096 / (2 * pi)  # the resolution of the Dynamixel xm430 w210
-    _pulse_center= 2048
-    _max_vel = 1000  # *0.01 rev/min
+motors_description = [
+                        {
+                            "id": [0, 1, 2, 3],
+                            "model": "XM430-W210",
+                            "length_to_rad": 0.05,
+                            "pulse_center": 2048,
+                            "max_vel": 1000
+                        }
+                    ]
 
-    def __init__(self):
-        super().__init__() # Check if all parameters have been set
-
-robot_motors = MyDynamixelMotors()
+robot_motors = DynamixelMotors.from_dicts(motors_description)
         
 if robot_motors.open(): 
     
@@ -42,26 +42,72 @@ if robot_motors.open():
 
 ```
 
-By default, there are four motors with IDS 0, 1, 2, and 3. You can change this in the [_dynamixelmotorsparameters.py](dynamixelmotorsapi/_dynamixelmotorsparameters.py) at line 21:
 
-``` python
-21 |    DXL_IDs = (0, 1, 2, 3)
-```
+The catalog of Dynamixel motors has been compiled into the file [dynamixel_configs.json](dynamixelmotorsapi\dynamixel_configs.json).
+They've been extracted from the Dynamixel website.
 
-To change the motors parameters based on your motors, like the addresses and values, you can also change them into the file [_dynamixelmotorsparameters.py](dynamixelmotorsapi/_dynamixelmotorsparameters.py) if needed.
+You have several ways to create a `DynamixelMotors` object, either by using the `from_dicts` method, which takes a list of dictionaries or one dictionnary describing the motors like above or you can also use a json file containing the same list of dictionaries, and use the `from_json` method. 
 
-The parameters already include some Dynamixel motor series so you can easily switch by commenting and uncommenting the right line:
+Except for the `id` parameter, which must be a list of unique IDs for each motor, the other parameters can be shared among motors of the same model or can also be lists of values for each motor, as long as they are consistent with the number of motors described in the `id` parameter.
+
+Several syntaxes are possible for the motor description dictionaries, as long as they contain the required information (id, model, length_to_rad, pulse_center, max_vel).
+
 ```python
- 4 |    #***** (Use only one definition at a time) *****
- 5 |    MY_DXL = 'X_SERIES'       # X330 (5.0 V recommended), X430, X540, 2X430
- 6 |    # MY_DXL = 'MX_SERIES'    # MX series with 2.0 firmware update.
- 7 |    # MY_DXL = 'PRO_SERIES'   # H54, H42, M54, M42, L54, L42
- 8 |    # MY_DXL = 'PRO_A_SERIES' # PRO series with (A) firmware update.
- 9 |    # MY_DXL = 'P_SERIES'     # PH54, PH42, PM54
-10 |    # MY_DXL = 'XL320'        # [WARNING] Operating Voltage : 7.4V
+# Example of a motor description dictionary for 4 XM430-W210 motors, note that the IDs must be unique for each motor, but the other parameters can be shared among motors of the same model.
+{
+    "id": [0, 1, 2, 3],
+    "model": "XM430-W210",
+    "length_to_rad": 0.05,
+    "pulse_center": 2048,
+    "max_vel": 1000
+}
+
+# Equivalent to the above, but with the parameters as lists of values for each motor, which can be useful if you have motors of different models or with different configurations.
+[
+    {
+        "id": [0, 1, 2, 3],
+        "model": ["XM430-W210"]*4,
+        "length_to_rad": [0.05]*4,
+        "pulse_center": [2048, 2048, 2048, 2048],
+        "max_vel": [1000]*4
+    }
+]
+
+# Equivalent to the above, but with each motor described as a separate dictionary in the list, which can be useful if you want to have more flexibility in the configuration of each motor.
+[
+    {
+        "id": 0,
+        "model": "XM430-W210",
+        "length_to_rad": 0.05,
+        "pulse_center": 2048,
+        "max_vel": 1000
+    },
+    {
+        "id": 1,
+        "model": "XM430-W210",
+        "length_to_rad": 0.05,
+        "pulse_center": 2048,
+        "max_vel": 1000
+    },
+    {
+        "id": 2,
+        "model": "XM430-W210",
+        "length_to_rad": 0.05,
+        "pulse_center": 2048,
+        "max_vel": 1000
+    },
+    {
+        "id": 3,
+        "model": "XM430-W210",
+        "length_to_rad": 0.05,
+        "pulse_center": 2048,
+        "max_vel": 1000
+    }
+]
 ```
 
-⚠️ For now, the API assumes that all the motors are the same
+
+You can also create a `DynamixelMotors` object by directly passing a list of `MotorConfig` objects to the constructor.
 
 ## For Developers
 The documentation is generated using [pydoc-markdown](https://pypi.org/project/pydoc-markdown/). To generate the documentation, you need to install `pydoc-markdown`:

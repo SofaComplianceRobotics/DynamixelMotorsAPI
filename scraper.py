@@ -39,7 +39,7 @@ SESSION.headers.update({
 
 
 # ── Data model ─────────────────────────────────────────────────────────────────
-from dynamixelmotorsapi._dynamixelmotorsparameters import ModelConfig
+from dynamixelmotorsapi._dynamixelmotorsconfigs import ModelConfig
 # We extend the base SeriesConfig with an 'errors' field to capture any issues during scraping.
 MotorConfig  = make_dataclass(
     "SeriesConfig",

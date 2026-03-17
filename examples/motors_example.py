@@ -44,16 +44,24 @@ if __name__ == "__main__":
         logger.info("Starting DynamixelMotors API test...")
         logger.info("Opening and configuring Robot Motors API...")
 
-        motors_description = [{
-            "id": 0,
-            "model": "XM430-W210",
-            "length_to_rad": 0.05,
-            "pulse_center": 2048,
-            "max_vel": 1000
-        }
+        motors_description = [
+            {
+                "id": 0,
+                "model": "XM430-W210",
+                "length_to_rad": 0.05,
+                "pulse_center": 2048,
+                "max_vel": 1000
+            },
+            {
+                "id": [1, 2, 3],
+                "model": ["XM430-W210"]*3,
+                "length_to_rad": [0.05]*3,
+                "pulse_center": [2048]*3,
+                "max_vel": [1000]*3
+            }
         ]
         
-        robot_motors = DynamixelMotors.from_dict(motors_description)
+        robot_motors = DynamixelMotors.from_dicts(motors_description)
         
         if robot_motors.open(): 
             

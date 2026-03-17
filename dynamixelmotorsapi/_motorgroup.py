@@ -8,7 +8,7 @@ import serial.tools.list_ports as list_ports
 
 from dynamixel_sdk import *
 
-from dynamixelmotorsapi._dynamixelmotorsparameters import (
+from dynamixelmotorsapi._dynamixelmotorsconfigs import (
     MotorConfig, ModelConfig, PROTOCOL_VERSION, BAUDRATE,
     TORQUE_ENABLE, TORQUE_DISABLE, VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE
 )
@@ -286,16 +286,12 @@ class MotorGroup:
 
     def enableTorque(self):
         """Enable torque on all motors."""
-        self._write1ByteAll(
-            lambda cfg: cfg.model_config.model.addr_torque_enable, TORQUE_ENABLE
-        )
+        self._write1ByteAll(lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_ENABLE)
 
 
     def disableTorque(self):
         """Disable torque on all motors."""
-        self._write1ByteAll(
-            lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_DISABLE
-        )
+        self._write1ByteAll(lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_DISABLE)
 
 
     def isTorqueEnable(self) -> list:

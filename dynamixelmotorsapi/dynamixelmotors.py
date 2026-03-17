@@ -4,10 +4,10 @@ from typing import List
 import json
 
 import dynamixelmotorsapi._motorgroup as motorgroup
-from dynamixelmotorsapi._dynamixelmotorsparameters import MotorConfig
+from dynamixelmotorsapi._dynamixelmotorsconfigs import MotorConfig
 from dynamixelmotorsapi._logging_config import logger
 
-from dynamixelmotorsapi._dynamixelmotorsparameters import register_model_from_json, MODELS_CONFIGS
+from dynamixelmotorsapi._dynamixelmotorsconfigs import register_model_from_json, MODELS_CONFIGS
 loaded_models = register_model_from_json("./dynamixelmotorsapi/dynamixel_configs.json", overwrite=True)
 if len(loaded_models):
     print("Loaded ", len(MODELS_CONFIGS), " motor configs")
@@ -36,7 +36,7 @@ class DynamixelMotors:
             print("Failed to connect to motors.")
         ```
 
-    JSON format:
+    JSON format examples:
         ```json
         [
             {
@@ -55,8 +55,18 @@ class DynamixelMotors:
             }
         ]
         ```
-    """
 
+        ```json
+        {
+            "id": [0, 1],
+            "model": ["XM430-W210", "P_SERIES"],
+            "length_to_rad": [0.05, 0.03],
+            "pulse_center": [2048, 0],
+            "max_vel": [1000, 500]
+        }
+        ```
+    """
+    _FTDI_list = {}
     _initialized: bool = False
 
     _motor_configs: List[MotorConfig] = None
@@ -88,7 +98,22 @@ class DynamixelMotors:
 
 
     @classmethod
-    def from_dict(cls, data: list) -> "DynamixelMotors":
+    def unwrap_dict(cls, data: dict) -> List[MotorConfig]:
+        """Helper function to convert a dict of motor configs into a list of dicts, one per motor."""
+        if isinstance(data["id"], list):
+            motors_count = len(data["id"])
+            for key, value in data.items():
+                if isinstance(value, list) and len(value) != motors_count:
+                    raise ValueError(f"All list values in the motor config dict must have the same length. Key '{key}' has length {len(value)}, expected {motors_count}.")
+                elif not isinstance(value, list):
+                    data[key] = [value] * motors_count
+            return [dict(zip(data.keys(), values)) for values in zip(*data.values())]  # zip the dict of lists into a list of dicts, one per motor
+        else :
+            return [data]  # single motor case
+        
+
+    @classmethod
+    def from_dicts(cls, data: list) -> "DynamixelMotors":
         """
         Instantiate from a list of per-motor config dicts.
 
@@ -97,9 +122,68 @@ class DynamixelMotors:
 
         Returns:
             A configured DynamixelMotors instance (not yet connected).
+
+        Example:
+        ```json
+        [
+            {
+                "id": 0,
+                "model": "XM430-W210",
+                "length_to_rad": 0.05,
+                "pulse_center": 2048,
+                "max_vel": 1000
+            },
+            {
+                "id": [1, 2],
+                "model": ["XM430-W210", "P_SERIES"],
+                "length_to_rad": [0.05, 0.03],
+                "pulse_center": [0, 0],
+                "max_vel": [1000, 500]
+            }
+        ]
+        ```
         """
-        motor_configs = [MotorConfig.from_dict(m) for m in data]
+        dicts = []
+        for d in data:
+            dicts.extend(cls.unwrap_dict(d))
+        motor_configs = [MotorConfig.from_dict(m) for m in dicts]
         return cls(motor_configs)
+    
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "DynamixelMotors":
+        """
+        Instantiate from a list of per-motor config dicts.
+
+        Args:
+            data: dict of lists, each list containing the fields for the MotorConfig.
+
+        Returns:
+            A configured DynamixelMotors instance (not yet connected).
+
+        Example:
+        ```json
+         {
+            "id": 0,
+            "model": "XM430-W210",
+            "length_to_rad": 0.05,
+            "pulse_center": 2048,
+            "max_vel": 1000
+        }
+
+        OR
+
+        {
+            "id": [0, 1],
+            "model": ["XM430-W210", "P_SERIES"],
+            "length_to_rad": [0.05, 0.03],
+            "pulse_center": [2048, 0],
+            "max_vel": [1000, 500]
+        }
+        ```
+        """
+        motor_dicts = cls.unwrap_dict(data)
+        return  cls([MotorConfig.from_dict(m) for m in motor_dicts])
 
 
     @classmethod
@@ -114,7 +198,11 @@ class DynamixelMotors:
             A configured DynamixelMotors instance (not yet connected).
         """
         with open(path) as f:
-            return cls.from_dict(json.load(f))
+            json = json.load(f)
+            if isinstance(json, list):
+                return cls.from_dicts(json)
+            elif isinstance(json, dict):
+                return cls.from_dict(json)
 
 
     def _config(self, index: int) -> MotorConfig:
@@ -203,7 +291,11 @@ class DynamixelMotors:
                     self.enableExtendedPositionMode()
                 else:
                     self.enablePositionMode()
+                # set the max velocity profile to the configured max velocity for each motor
+                self._mg.setVelocityProfile([cfg.max_vel for cfg in self._motor_configs])
                 self._mg.enableTorque()
+
+                DynamixelMotors._FTDI_list[self._mg.deviceName] = self  # add the connected device to the list of used devices
 
                 logger.debug(
                     f"Motor group opened and configured. "
@@ -270,6 +362,7 @@ class DynamixelMotors:
         with self._lock:
             try:
                 self._mg.close()
+                DynamixelMotors._FTDI_list.pop(self._mg.deviceName, None)
                 logger.info("Motors connection closed.")
             except Exception as e:
                 logger.error(e)
@@ -286,6 +379,19 @@ class DynamixelMotors:
                 f"  radians: {[round(a, 4) for a in rads]}\n"
                 f"  pulses:  {list(current_pos)}\n"
                 f"  degrees: {[round(a, 2) for a in degrees]}"
+            )
+
+    
+    def printConfig(self):
+        """Print the current configuration of the motors."""
+        for i, cfg in enumerate(self._motor_configs):
+            logger.info(
+                f"Motor {i} config:\n"
+                f"  ID: {cfg.id}\n"
+                f"  Model: {cfg.model}\n"
+                f"  Length to rad conversion: {cfg.length_to_rad}\n"
+                f"  Pulse center: {cfg.pulse_center}\n"
+                f"  Max velocity: {cfg.max_vel}"
             )
 
 
