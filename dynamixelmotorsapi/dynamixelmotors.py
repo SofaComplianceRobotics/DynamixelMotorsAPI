@@ -8,9 +8,12 @@ from dynamixelmotorsapi._dynamixelmotorsconfigs import MotorConfig
 from dynamixelmotorsapi._logging_config import logger
 
 from dynamixelmotorsapi._dynamixelmotorsconfigs import register_model_from_json, MODELS_CONFIGS
-loaded_models = register_model_from_json("./dynamixelmotorsapi/dynamixel_configs.json", overwrite=True)
-if len(loaded_models):
-    print("Loaded ", len(MODELS_CONFIGS), " motor configs")
+try:
+    loaded_models = register_model_from_json("./dynamixelmotorsapi/dynamixel_configs.json", overwrite=True)
+    if len(loaded_models):
+        logger.info("Loaded ", len(MODELS_CONFIGS), " motor configs")
+except Exception as e:
+    logger.error(f"Failed to load motor configs from JSON: {e}")
 
 
 class DynamixelMotors:
@@ -42,7 +45,7 @@ class DynamixelMotors:
             {
                 "id": 0,
                 "model": "XM430-W210",
-                "length_to_rad": 0.05,
+                "length_to_rad": 0.05,  # 1/radius of the pulley
                 "pulse_center": 2048,
                 "max_vel": 1000
             },

@@ -254,7 +254,6 @@ class MotorGroup:
         """Open the port and set the baud rate."""
         try:
             self.portHandler.openPort()
-            self.portHandler.setBaudRate(BAUDRATE)
         except Exception as e:
             raise Exception(f"Failed to open port: {e}")
         
@@ -298,6 +297,7 @@ class MotorGroup:
         """Return the torque enable state for each motor."""
         result = []
         for cfg in self.motorsConfig:
+            self.portHandler.setBaudRate(cfg.baud_rate)
             torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
                 self.portHandler, cfg.id, cfg.model_config.addr_torque_enable
             )
@@ -350,6 +350,22 @@ class MotorGroup:
         if any(t == 1 for t in torques):
             self.enableTorque()
 
+    def getBaudRate(self) -> list:
+        """Get the baud rate for each motor."""
+        result = []
+        for cfg in self.motorsConfig:
+            baud_rate, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
+                self.portHandler, cfg.id, cfg.model_config.addr_baud_rate
+            )
+            if dxl_comm_result != COMM_SUCCESS:
+                raise Exception(f"Failed to read baud rate (motor {cfg.id}): "
+                                f"{self.packetHandler.getTxRxResult(dxl_comm_result)}")
+            if dxl_error != 0:
+                raise Exception(f"Failed to read baud rate (motor {cfg.id}): "
+                                f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            result.append(baud_rate)
+        return result
+
     # ------------------------------------------------------------------ #
     #  Low-level read / write helpers                                      #
     # ------------------------------------------------------------------ #
@@ -366,17 +382,19 @@ class MotorGroup:
             raise DisconnectedException()
         for cfg in self.motorsConfig:
             addr = addr_fn(cfg)
+            
+            self.portHandler.setBaudRate(cfg.baud_rate)
+
             dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
                 self.portHandler, cfg.id, addr, value
             )
             if dxl_comm_result != COMM_SUCCESS:
-                raise Exception(f"Failed to write byte to motor {cfg.id} at addr {addr}: "
+                raise Exception(f"Failed to write byte {value} to motor ID {cfg.id} at addr {addr}: "
                                 f"{self.packetHandler.getTxRxResult(dxl_comm_result)}")
             if dxl_error != 0:
                 raise Exception(f"Error on motor {cfg.id} at addr {addr}: "
                                 f"{self.packetHandler.getRxPacketError(dxl_error)}")
             logger.debug(f"Motor {cfg.id}: addr {addr} set to {value}")
-
 
     def _readSyncMotorsData(self, reader_name: str) -> list:
         """
@@ -395,6 +413,9 @@ class MotorGroup:
         # Collect results keyed by motor ID across all models
         results_by_id = {}
         for model_name, readers in self.groupReaders.items():
+            
+            self.portHandler.setBaudRate(self._models_groups[model_name][0].baud_rate)
+
             group = readers[reader_name]
             dxl_comm_result = group.txRxPacket()
             if dxl_comm_result != COMM_SUCCESS:
@@ -430,6 +451,7 @@ class MotorGroup:
         values_by_id = {cfg.id: values[i] for i, cfg in enumerate(self.motorsConfig)}
 
         for model_name, writers in self.groupWriters.items(): # iterate through motor models in groupwriters
+            self.portHandler.setBaudRate(self._models_groups[model_name][0].baud_rate)
             group = writers[writer_name]
             group.clearParam()
             for cfg in self._models_groups[model_name]: # get the MotorConfigs for model model_name

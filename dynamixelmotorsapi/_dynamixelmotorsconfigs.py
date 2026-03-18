@@ -31,6 +31,8 @@ class ModelConfig:
     url: str
 
     resolution:               Optional[int] = None
+    addr_baud_rate:            Optional[int] = None
+    len_baud_rate:             Optional[int] = None
     addr_torque_enable:       Optional[int] = None
     addr_operating_mode:      Optional[int] = None
     addr_goal_position:       Optional[int] = None
@@ -72,6 +74,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         series                   = "X_SERIES",
         url                      = "https://emanual.robotis.com/docs/en/dxl/x/xm430-w210/",
         resolution               = 4096,
+        addr_baud_rate           = 8,
+        len_baud_rate            = 1,
         addr_torque_enable       = 64,
         addr_operating_mode      = 11,
         addr_goal_position       = 116,
@@ -105,6 +109,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         series                   = "MX_SERIES",
         url                      = "https://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/",
         resolution               = 4096,
+        addr_baud_rate           = 8,
+        len_baud_rate            = 1,
         addr_torque_enable       = 64,
         addr_operating_mode      = 11,
         addr_goal_position       = 116,
@@ -137,6 +143,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         series                   = "P_SERIES",
         url                      = "https://emanual.robotis.com/docs/en/dxl/p/pm42-010-s260-r/",
         resolution               = 501923,
+        addr_baud_rate           = 8,
+        len_baud_rate            = 1,
         addr_torque_enable       = 512,
         addr_operating_mode      = 11,
         addr_goal_position       = 564,
@@ -295,6 +303,7 @@ class MotorConfig:
     length_to_rad: float
     pulse_center:  int
     max_vel:       float
+    baud_rate:     int
 
     # Provide one of these — not both (unless consistent), not neither
     model:        Optional[str]          = None
@@ -354,4 +363,5 @@ class MotorConfig:
             length_to_rad = data["length_to_rad"],
             pulse_center  = data["pulse_center"],
             max_vel       = data["max_vel"],
+            baud_rate     = data["baud_rate"],
         )

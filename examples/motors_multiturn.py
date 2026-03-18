@@ -55,6 +55,7 @@ if __name__ == "__main__":
                 "length_to_rad": [0.05]*4,
                 "pulse_center": [2048]*4,
                 "max_vel": [1000, 500, 600, 300]
+                "baud_rate": 1000000
             }
         ]
         

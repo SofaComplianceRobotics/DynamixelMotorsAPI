@@ -54,6 +54,9 @@ MotorConfig  = make_dataclass(
 # More specific entries must come before more generic ones.
 
 REGISTER_MAP = [
+    # Baud rate
+    ("baud rate",              "addr_baud_rate",          "len_baud_rate",          "initial_baud_rate"),
+    
     # Torque / mode
     ("torque enable",          "addr_torque_enable",       "len_torque_enable",       "initial_torque_enable"),
     ("operating mode",         "addr_operating_mode",      "len_operating_mode",      "initial_operating_mode"),

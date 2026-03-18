@@ -50,14 +50,16 @@ if __name__ == "__main__":
                 "model": "XM430-W210",
                 "length_to_rad": 0.05,
                 "pulse_center": 2048,
-                "max_vel": 1000
+                "max_vel": 1000,
+                "baud_rate": 1000000
             },
             {
                 "id": [1, 2, 3],
                 "model": ["XM430-W210"]*3,
                 "length_to_rad": [0.05]*3,
                 "pulse_center": [2048]*3,
-                "max_vel": [1000]*3
+                "max_vel": [1000]*3,
+                "baud_rate": [4000000]*3
             }
         ]
         
