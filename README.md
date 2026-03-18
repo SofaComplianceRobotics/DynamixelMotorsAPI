@@ -25,7 +25,8 @@ motors_description = [
                             "model": "XM430-W210",
                             "length_to_rad": 0.05,
                             "pulse_center": 2048,
-                            "max_vel": 1000
+                            "max_vel": 1000,
+                            "baud_rate": 57600  
                         }
                     ]
 
@@ -59,7 +60,8 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     "model": "XM430-W210",
     "length_to_rad": 0.05,
     "pulse_center": 2048,
-    "max_vel": 1000
+    "max_vel": 1000,
+    "baud_rate": 57600
 }
 
 # Equivalent to the above, but with the parameters as lists of values for each motor, which can be useful if you have motors of different models or with different configurations.
@@ -69,7 +71,8 @@ Several syntaxes are possible for the motor description dictionaries, as long as
         "model": ["XM430-W210"]*4,
         "length_to_rad": [0.05]*4,
         "pulse_center": [2048, 2048, 2048, 2048],
-        "max_vel": [1000]*4
+        "max_vel": [1000]*4,
+        "baud_rate": [57600]*4
     }
 ]
 
@@ -80,28 +83,32 @@ Several syntaxes are possible for the motor description dictionaries, as long as
         "model": "XM430-W210",
         "length_to_rad": 0.05,
         "pulse_center": 2048,
-        "max_vel": 1000
+        "max_vel": 1000,
+        "baud_rate": 57600
     },
     {
         "id": 1,
         "model": "XM430-W210",
         "length_to_rad": 0.05,
         "pulse_center": 2048,
-        "max_vel": 1000
+        "max_vel": 1000,
+        "baud_rate": 57600
     },
     {
         "id": 2,
         "model": "XM430-W210",
         "length_to_rad": 0.05,
         "pulse_center": 2048,
-        "max_vel": 1000
+        "max_vel": 1000,
+        "baud_rate": 57600
     },
     {
         "id": 3,
         "model": "XM430-W210",
         "length_to_rad": 0.05,
         "pulse_center": 2048,
-        "max_vel": 1000
+        "max_vel": 1000,
+        "baud_rate": 57600
     }
 ]
 ```

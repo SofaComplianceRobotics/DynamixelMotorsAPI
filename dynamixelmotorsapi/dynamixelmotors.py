@@ -47,14 +47,16 @@ class DynamixelMotors:
                 "model": "XM430-W210",
                 "length_to_rad": 0.05,  # 1/radius of the pulley
                 "pulse_center": 2048,
-                "max_vel": 1000
+                "max_vel": 1000,
+                "baud_rate": 57600
             },
             {
                 "id": 1,
                 "model": "P_SERIES",
                 "length_to_rad": 0.03,
                 "pulse_center": 0,
-                "max_vel": 500
+                "max_vel": 500,
+                "baud_rate": 57600
             }
         ]
         ```
@@ -65,7 +67,8 @@ class DynamixelMotors:
             "model": ["XM430-W210", "P_SERIES"],
             "length_to_rad": [0.05, 0.03],
             "pulse_center": [2048, 0],
-            "max_vel": [1000, 500]
+            "max_vel": [1000, 500],
+            "baud_rate": 57600
         }
         ```
     """
@@ -139,14 +142,16 @@ class DynamixelMotors:
                 "model": "XM430-W210",
                 "length_to_rad": 0.05,
                 "pulse_center": 2048,
-                "max_vel": 1000
+                "max_vel": 1000,
+                "baud_rate": 57600
             },
             {
                 "id": [1, 2],
                 "model": ["XM430-W210", "P_SERIES"],
                 "length_to_rad": [0.05, 0.03],
                 "pulse_center": [0, 0],
-                "max_vel": [1000, 500]
+                "max_vel": [1000, 500],
+                "baud_rate": 57600
             }
         ]
         ```
@@ -176,7 +181,8 @@ class DynamixelMotors:
             "model": "XM430-W210",
             "length_to_rad": 0.05,
             "pulse_center": 2048,
-            "max_vel": 1000
+            "max_vel": 1000,
+            "baud_rate": 57600
         }
 
         OR
@@ -186,7 +192,8 @@ class DynamixelMotors:
             "model": ["XM430-W210", "P_SERIES"],
             "length_to_rad": [0.05, 0.03],
             "pulse_center": [2048, 0],
-            "max_vel": [1000, 500]
+            "max_vel": [1000, 500],
+            "baud_rate": 57600
         }
         ```
         """
