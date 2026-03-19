@@ -22,14 +22,16 @@ def motors():
                     "model": "XM430-W210",
                     "pulley_radius": 20,
                     "pulse_center": 2048,
-                    "max_vel": 1000
+                    "max_vel": 1000,
+                    "baud_rate": 1000000
                 },
                 {
                     "id": [1, 2, 3],
                     "model": "L54-30-S400-R",
                     "pulley_radius": 20,
                     "pulse_center": 0,
-                    "max_vel": 500
+                    "max_vel": 500,
+                    "baud_rate": 57600
                 },
             ]
     print("CONFIG ", config)
@@ -43,7 +45,8 @@ def emio_motors():
                     "model": "XM430-W210",
                     "pulley_radius": 20,
                     "pulse_center": 2048,
-                    "max_vel": 1000
+                    "max_vel": 1000,
+                    "baud_rate": 1000000
                 },
             ]
     print("CONFIG ", config)
