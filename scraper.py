@@ -40,9 +40,9 @@ SESSION.headers.update({
 
 # ── Data model ─────────────────────────────────────────────────────────────────
 from dynamixelmotorsapi._dynamixelmotorsconfigs import ModelConfig
-# We extend the base SeriesConfig with an 'errors' field to capture any issues during scraping.
+# We extend the base ModelConfig with an 'errors' field to capture any issues during scraping.
 MotorConfig  = make_dataclass(
-    "SeriesConfig",
+    "ModelConfig",
     [(f.name, Optional[f.type], field(default=None)) for f in fields(ModelConfig)] +
     [("errors", list, field(default_factory=list))]
 )
@@ -70,6 +70,9 @@ REGISTER_MAP = [
     ("position d gain",        "addr_position_d_gain",     "len_position_d_gain",     "initial_position_d_gain"),
     ("min position limit",     "addr_min_position",        "len_min_position",        "min_position_value"),
     ("max position limit",     "addr_max_position",        "len_max_position",        "max_position_value"),
+
+    # Current
+    ("present current",        "addr_present_current",     "len_present_current",     "initial_present_current"),
 
     # Velocity
     ("goal velocity",          "addr_goal_velocity",       "len_goal_velocity",       "initial_goal_velocity"),
@@ -109,7 +112,11 @@ def fetch(url: str, retries: int = 3) -> Optional[BeautifulSoup]:
         try:
             resp = SESSION.get(url, timeout=15)
             resp.raise_for_status()
-            return BeautifulSoup(resp.text, "html.parser")
+            soup = BeautifulSoup(resp.content, "html.parser")
+            # save soup into a file for debugging
+            with open("debug_soup.html", "w", encoding="utf-8") as f:
+                f.write(str(soup))
+            return soup
         except requests.RequestException as e:
             wait = 2 ** attempt
             log.warning(f"  Fetch error ({e}), retrying in {wait}s…")
@@ -267,12 +274,38 @@ def parse_control_tables(soup: BeautifulSoup) -> dict[str, dict]:
     return registers
 
 
+def parse_current_unit(soup: BeautifulSoup) -> Optional[float]:
+    """
+    Extract the current unit (mA per unit) from the page, in the Current Limit section
+    """
+    # get table from "Current Limit"section
+    table = soup.css.select_one("h3[id*='current-limit'] ~ table")
+    if table:
+        if table.find(string=re.compile(r"Unit", re.IGNORECASE)):
+            # find the cell that contains "Unit" and extract the number from it
+            unit_cell_index = None
+            for i, cell in enumerate(table.find_all("th")):
+                if re.search(r"Unit", cell.get_text(), re.IGNORECASE):
+                    unit_cell_index = i
+                    break
+            unit__cell = table.find_all("td")[unit_cell_index] if unit_cell_index is not None else None
+            if unit__cell:
+                text = unit__cell.get_text(strip=True)
+                m = re.search(r"([\d,.]+)\s*\[?m?A\]?", text, re.IGNORECASE)
+                if m:
+                    converted = float(m.group(1).replace(",", ""))
+                    if re.search(r"\bA\b", text, re.IGNORECASE): # if in A, convert to mA
+                        converted *= 1000
+                    return converted
+        
+
+
 def map_registers(registers: dict) -> dict:
-    """Apply REGISTER_MAP to produce SeriesConfig-compatible field dict."""
+    """Apply REGISTER_MAP to produce ModelConfig-compatible field dict."""
     result = {}
 
-    print(registers.keys())
-    print(REGISTER_MAP)
+    print("Extracted register: \n", registers.keys())
+    # print(REGISTER_MAP)
 
     for reg_name, reg_data in registers.items():
         for fragment, addr_field, len_field, ini_field in REGISTER_MAP:
@@ -298,6 +331,7 @@ def scrape_motor(model: str, url: str) -> MotorConfig:
     if not soup:
         config.errors.append("Failed to fetch page")
         return config
+    
 
     # 1. Specifications
     specs = parse_specs(soup)
@@ -314,6 +348,10 @@ def scrape_motor(model: str, url: str) -> MotorConfig:
     for field_name, value in mapped.items():
         if hasattr(config, field_name):
             setattr(config, field_name, value)
+
+    # 4. Get current unit
+    config.current_unit = parse_current_unit(soup)
+    
 
     return config
 

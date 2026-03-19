@@ -52,7 +52,7 @@ if __name__ == "__main__":
             {
                 "id": [0, 1, 2, 3],
                 "model": "XM430-W210",
-                "length_to_rad": [0.05]*4,
+                "pulley_radius": [20]*4, # radius of the pulley in mm
                 "pulse_center": [2048]*4,
                 "max_vel": [1000, 500, 600, 300],
                 "baud_rate": 1000000

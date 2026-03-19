@@ -23,7 +23,7 @@ motors_description = [
                         {
                             "id": [0, 1, 2, 3],
                             "model": "XM430-W210",
-                            "length_to_rad": 0.05,
+                            "pulley_radius": 20, # radius of the pulley in mm
                             "pulse_center": 2048,
                             "max_vel": 1000,
                             "baud_rate": 57600  
@@ -51,14 +51,14 @@ You have several ways to create a `DynamixelMotors` object, either by using the 
 
 Except for the `id` parameter, which must be a list of unique IDs for each motor, the other parameters can be shared among motors of the same model or can also be lists of values for each motor, as long as they are consistent with the number of motors described in the `id` parameter.
 
-Several syntaxes are possible for the motor description dictionaries, as long as they contain the required information (id, model, length_to_rad, pulse_center, max_vel).
+Several syntaxes are possible for the motor description dictionaries, as long as they contain the required information: id, model, pulley_radius (mm), pulse_center, max_vel (rev/min).
 
 ```python
 # Example of a motor description dictionary for 4 XM430-W210 motors, note that the IDs must be unique for each motor, but the other parameters can be shared among motors of the same model.
 {
     "id": [0, 1, 2, 3],
     "model": "XM430-W210",
-    "length_to_rad": 0.05,
+    "pulley_radius": 20,
     "pulse_center": 2048,
     "max_vel": 1000,
     "baud_rate": 57600
@@ -69,7 +69,7 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     {
         "id": [0, 1, 2, 3],
         "model": ["XM430-W210"]*4,
-        "length_to_rad": [0.05]*4,
+        "pulley_radius": [20]*4,
         "pulse_center": [2048, 2048, 2048, 2048],
         "max_vel": [1000]*4,
         "baud_rate": [57600]*4
@@ -81,7 +81,7 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     {
         "id": 0,
         "model": "XM430-W210",
-        "length_to_rad": 0.05,
+        "pulley_radius": 20,
         "pulse_center": 2048,
         "max_vel": 1000,
         "baud_rate": 57600
@@ -89,7 +89,7 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     {
         "id": 1,
         "model": "XM430-W210",
-        "length_to_rad": 0.05,
+        "pulley_radius": 20,
         "pulse_center": 2048,
         "max_vel": 1000,
         "baud_rate": 57600
@@ -97,7 +97,7 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     {
         "id": 2,
         "model": "XM430-W210",
-        "length_to_rad": 0.05,
+        "pulley_radius": 20,
         "pulse_center": 2048,
         "max_vel": 1000,
         "baud_rate": 57600
@@ -105,7 +105,7 @@ Several syntaxes are possible for the motor description dictionaries, as long as
     {
         "id": 3,
         "model": "XM430-W210",
-        "length_to_rad": 0.05,
+        "pulley_radius": 20,
         "pulse_center": 2048,
         "max_vel": 1000,
         "baud_rate": 57600

@@ -9,8 +9,8 @@ import serial.tools.list_ports as list_ports
 from dynamixel_sdk import *
 
 from dynamixelmotorsapi._dynamixelmotorsconfigs import (
-    MotorConfig, ModelConfig, PROTOCOL_VERSION, BAUDRATE,
-    TORQUE_ENABLE, TORQUE_DISABLE, VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE
+    MotorConfig, ModelConfig, PROTOCOL_VERSION, TORQUE_ENABLE, TORQUE_DISABLE, 
+    VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE
 )
 from dynamixelmotorsapi._logging_config import logger
 
@@ -155,6 +155,9 @@ class MotorGroup:
                 "goal_velocity": GroupSyncRead(
                     self.portHandler, self.packetHandler,
                     sc.addr_goal_velocity, sc.len_goal_velocity),
+                "velocity_profile": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_velocity_profile, sc.len_goal_velocity),
                 "moving": GroupSyncRead(
                     self.portHandler, self.packetHandler,
                     sc.addr_moving, 1),
@@ -176,6 +179,9 @@ class MotorGroup:
                 "position_d_gain": GroupSyncRead(
                     self.portHandler, self.packetHandler,
                     sc.addr_position_d_gain, sc.len_position_d_gain),
+                "present_current": GroupSyncRead(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_present_current, sc.len_present_current),
             }
 
             writers = {
@@ -197,6 +203,9 @@ class MotorGroup:
                 "position_d_gain": GroupSyncWrite(
                     self.portHandler, self.packetHandler,
                     sc.addr_position_d_gain, sc.len_position_d_gain),
+                "present_current": GroupSyncWrite(
+                    self.portHandler, self.packetHandler,
+                    sc.addr_present_current, sc.len_present_current),
             }
 
             # Register all motor IDs in this model with every reader
@@ -494,6 +503,10 @@ class MotorGroup:
         """Set the position D gain for each motor."""
         self.__writeSyncMotorsData("position_d_gain", d_gains)
 
+    def setPresentCurrent(self, currents: list):
+        """Set the present current for each motor."""
+        self.__writeSyncMotorsData("present_current", currents)
+
     def getCurrentPosition(self) -> list:
         """Get the current position (pulses) for each motor."""
         return self._readSyncMotorsData("position")
@@ -509,6 +522,10 @@ class MotorGroup:
     def getCurrentVelocity(self) -> list:
         """Get the current velocity for each motor."""
         return self._readSyncMotorsData("velocity")
+    
+    def getVelocityProfile(self) -> list:
+        """Get the velocity profile (position mode) for each motor."""
+        return self._readSyncMotorsData("velocity_profile")
 
     def isMoving(self) -> list:
         """Return True for each motor that is currently moving."""
@@ -537,3 +554,7 @@ class MotorGroup:
     def getPositionDGain(self) -> list:
         """Get the position D gain for each motor."""
         return self._readSyncMotorsData("position_d_gain")
+    
+    def getPresentCurrent(self) -> list:
+        """Get the present current for each motor."""
+        return self._readSyncMotorsData("present_current")

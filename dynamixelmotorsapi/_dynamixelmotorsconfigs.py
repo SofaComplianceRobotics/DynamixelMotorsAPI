@@ -31,8 +31,8 @@ class ModelConfig:
     url: str
 
     resolution:               Optional[int] = None
-    addr_baud_rate:            Optional[int] = None
-    len_baud_rate:             Optional[int] = None
+    addr_baud_rate:           Optional[int] = None
+    len_baud_rate:            Optional[int] = None
     addr_torque_enable:       Optional[int] = None
     addr_operating_mode:      Optional[int] = None
     addr_goal_position:       Optional[int] = None
@@ -43,9 +43,10 @@ class ModelConfig:
     len_present_position:     Optional[int] = None
     addr_present_velocity:    Optional[int] = None
     len_present_velocity:     Optional[int] = None
-    addr_velocity_profile:    Optional[int] = None
     addr_moving:              Optional[int] = None
     addr_moving_status:       Optional[int] = None
+    addr_velocity_profile:    Optional[int] = None
+    len_velocity_profile:     Optional[int] = None
     addr_velocity_trajectory: Optional[int] = None
     len_velocity_trajectory:  Optional[int] = None
     addr_position_trajectory: Optional[int] = None
@@ -56,6 +57,9 @@ class ModelConfig:
     len_position_i_gain:      Optional[int] = None
     addr_position_d_gain:     Optional[int] = None
     len_position_d_gain:      Optional[int] = None
+    addr_present_current:     Optional[int] = None
+    len_present_current:      Optional[int] = None
+    current_unit:             Optional[float] = None
     min_position_value:       Optional[int] = None
     max_position_value:       Optional[int] = None
 
@@ -99,6 +103,9 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_position_i_gain      = 2,
         addr_position_d_gain     = 80,
         len_position_d_gain      = 2,
+        addr_present_current     = 126,
+        len_present_current      = 2,
+        current_unit              = 2.69,  # mA per unit
         min_position_value       = 0,
         max_position_value       = 4095,
     ),
@@ -134,6 +141,9 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_position_i_gain      = 2,
         addr_position_d_gain     = 80,
         len_position_d_gain      = 2,
+        addr_present_current     = 126,
+        len_present_current      = 2,
+        current_unit              = 3.36,  # mA per unit
         min_position_value       = 0,
         max_position_value       = 4095,
     ),
@@ -168,6 +178,9 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_position_i_gain      = 2,
         addr_position_d_gain     = 528,
         len_position_d_gain      = 2,
+        addr_present_current     = 574,
+        len_present_current      = 2,
+        current_unit              = 1,  # mA per unit
         min_position_value       = -150000,
         max_position_value       = 150000,
     ),
@@ -280,12 +293,12 @@ class MotorConfig:
 
     Example (from name):
         ```python
-        MotorConfig(id=0, model="XM430-W210", length_to_rad=0.05, pulse_center=2048, max_vel=1000)
+        MotorConfig(id=0, model="XM430-W210", pulley_radius=20, pulse_center=2048, max_vel=1000)
         ```
 
     Example (ModelConfig directly):
         ```python
-        MotorConfig(id=0, model_config=my_config, length_to_rad=0.05, pulse_center=2048, max_vel=1000)
+        MotorConfig(id=0, model_config=my_config, pulley_radius=20, pulse_center=2048, max_vel=1000)
         ```
 
     Example JSON (name-based, for from_dict / from_json):
@@ -293,14 +306,14 @@ class MotorConfig:
         {
             "id": 0,
             "model": "XM430-W210",
-            "length_to_rad": 0.05,
+            "pulley_radius": 20,
             "pulse_center": 2048,
             "max_vel": 1000
         }
         ```
     """
     id:            int
-    length_to_rad: float
+    pulley_radius:  float
     pulse_center:  int
     max_vel:       float
     baud_rate:     int
@@ -340,15 +353,20 @@ class MotorConfig:
         raise ValueError(
             "Either 'model' (str) or 'model_config' (ModelConfig) must be provided."
         )
+    
+    @property
+    def length_to_rad(self) -> float:
+        """Conversion factor for length to radians, derived from the pulley radius."""
+        return 1./self.pulley_radius
 
     @property
     def rad_to_pulse(self) -> float:
-        """Derived from the model resolution."""
+        """Conversion factor from radians to pulses, derived from the motor model resolution."""
         return self.model_config.rad_to_pulse
 
     @property
     def length_to_pulse(self) -> float:
-        """Derived from length_to_rad and model resolution."""
+        """Conversion factor to convert a length (e.g. linear position of a joint) to motor pulses, derived from pulley radius and motor resolution."""
         return self.length_to_rad * self.rad_to_pulse
 
     @classmethod
@@ -360,7 +378,7 @@ class MotorConfig:
         return cls(
             id            = data["id"],
             model         = data["model"],
-            length_to_rad = data["length_to_rad"],
+            pulley_radius = data["pulley_radius"],
             pulse_center  = data["pulse_center"],
             max_vel       = data["max_vel"],
             baud_rate     = data["baud_rate"],

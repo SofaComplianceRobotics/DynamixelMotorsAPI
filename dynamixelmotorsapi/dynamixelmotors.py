@@ -11,7 +11,7 @@ from dynamixelmotorsapi._dynamixelmotorsconfigs import register_model_from_json,
 try:
     loaded_models = register_model_from_json("./dynamixelmotorsapi/dynamixel_configs.json", overwrite=True)
     if len(loaded_models):
-        logger.info("Loaded ", len(MODELS_CONFIGS), " motor configs")
+        logger.info(f"Loaded  {len(MODELS_CONFIGS)}  motor configs")
 except Exception as e:
     logger.error(f"Failed to load motor configs from JSON: {e}")
 
@@ -45,7 +45,7 @@ class DynamixelMotors:
             {
                 "id": 0,
                 "model": "XM430-W210",
-                "length_to_rad": 0.05,  # 1/radius of the pulley
+                "pulley_radius": 20,  # radius of the pulley in mm
                 "pulse_center": 2048,
                 "max_vel": 1000,
                 "baud_rate": 57600
@@ -53,7 +53,7 @@ class DynamixelMotors:
             {
                 "id": 1,
                 "model": "P_SERIES",
-                "length_to_rad": 0.03,
+                "pulley_radius": 30,  # radius of the pulley in mm
                 "pulse_center": 0,
                 "max_vel": 500,
                 "baud_rate": 57600
@@ -65,7 +65,7 @@ class DynamixelMotors:
         {
             "id": [0, 1],
             "model": ["XM430-W210", "P_SERIES"],
-            "length_to_rad": [0.05, 0.03],
+            "pulley_radius": [20, 30],
             "pulse_center": [2048, 0],
             "max_vel": [1000, 500],
             "baud_rate": 57600
@@ -76,8 +76,8 @@ class DynamixelMotors:
     _initialized: bool = False
 
     _motor_configs: List[MotorConfig] = None
-    _goal_velocity: list = None
-    _goal_position: list = None
+    _goal_velocity: list = None  # store the last commanded velocity in rev/min, per motor
+    _goal_position: list = None  # store the last commanded position in radians
     _mg: motorgroup.MotorGroup = None
     _device_index: int = None
 
@@ -140,7 +140,7 @@ class DynamixelMotors:
             {
                 "id": 0,
                 "model": "XM430-W210",
-                "length_to_rad": 0.05,
+                "pulley_radius": 20,  # radius of the pulley in mm
                 "pulse_center": 2048,
                 "max_vel": 1000,
                 "baud_rate": 57600
@@ -148,7 +148,7 @@ class DynamixelMotors:
             {
                 "id": [1, 2],
                 "model": ["XM430-W210", "P_SERIES"],
-                "length_to_rad": [0.05, 0.03],
+                "pulley_radius": [0.05, 0.03],
                 "pulse_center": [0, 0],
                 "max_vel": [1000, 500],
                 "baud_rate": 57600
@@ -179,7 +179,7 @@ class DynamixelMotors:
          {
             "id": 0,
             "model": "XM430-W210",
-            "length_to_rad": 0.05,
+            "pulley_radius": 20, # radius of the pulley in mm
             "pulse_center": 2048,
             "max_vel": 1000,
             "baud_rate": 57600
@@ -190,7 +190,7 @@ class DynamixelMotors:
         {
             "id": [0, 1],
             "model": ["XM430-W210", "P_SERIES"],
-            "length_to_rad": [0.05, 0.03],
+            "pulley_radius": [20, 30],
             "pulse_center": [2048, 0],
             "max_vel": [1000, 500],
             "baud_rate": 57600
@@ -426,6 +426,22 @@ class DynamixelMotors:
     #### Read and Write properties ####
 
     @property
+    def torque(self) -> list:
+        """Get the current torque status of the motors."""
+        with self._lock:
+            return self._mg.isTorqueEnable()
+        
+    @torque.setter
+    def torque(self, enable: bool):
+        """Enable or disable torque for the motors."""
+        with self._lock:
+            if enable:
+                self._mg.enableTorque()
+            else:
+                self._mg.disableTorque()
+
+                
+    @property
     def angles(self) -> list:
         """Get the current angles of the motors in radians."""
         with self._lock:
@@ -440,6 +456,20 @@ class DynamixelMotors:
                 int(cfg.pulse_center - cfg.rad_to_pulse * a)
                 for a, cfg in zip(angles, self._motor_configs)
             ])
+
+    
+    @property
+    def positions(self) -> list:
+        """Get the current positions of the motors in pulses."""
+        with self._lock:
+            return self._mg.getCurrentPosition()
+        
+    @positions.setter
+    def positions(self, positions: list):
+        """Set the goal positions of the motors in pulses."""
+        with self._lock:
+            self._goal_position = self.pulseToRad(positions)
+            self._mg.setGoalPosition(positions)
 
 
     @property
@@ -512,6 +542,37 @@ class DynamixelMotors:
         with self._lock:
             self._mg.setPositionDGain(d_gains)
 
+    @property
+    def velocity_profile(self) -> list:
+        """Get the velocity profile (rev/min) of the motors."""
+        with self._lock:
+            return self._mg.getVelocityProfile()
+        
+    @velocity_profile.setter
+    def velocity_profile(self, profile: list):
+        """Set the velocity profile (rev/min) of the motors."""
+        with self._lock:
+            self._mg.setVelocityProfile(profile)
+
+    @property
+    def currents(self) -> list:
+        """Get the current (mA) of the motors."""
+        with self._lock:
+            raw_currents = self._mg.getPresentCurrent()
+            currents = []
+            for raw, cfg in zip(raw_currents, self._motor_configs):
+                if cfg.current_unit is not None:
+                    currents.append(raw * cfg.current_unit)
+                else:
+                    currents.append(raw)
+            return currents
+        
+    @currents.setter
+    def currents(self, currents: list):
+        """Set the current (mA) of the motors."""
+        with self._lock:
+            self._mg.setPresentCurrent(currents)
+
 
     #### Read-only properties ####
 
@@ -569,3 +630,4 @@ class DynamixelMotors:
         """Get the position (pulse) trajectory of the motors."""
         with self._lock:
             return self._mg.getPositionTrajectory()
+    

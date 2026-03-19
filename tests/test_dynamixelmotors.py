@@ -20,14 +20,14 @@ def motors():
                 {
                     "id": 0,
                     "model": "XM430-W210",
-                    "length_to_rad": 0.05,
+                    "pulley_radius": 20,
                     "pulse_center": 2048,
                     "max_vel": 1000
                 },
                 {
                     "id": [1, 2, 3],
                     "model": "L54-30-S400-R",
-                    "length_to_rad": 0.05,
+                    "pulley_radius": 20,
                     "pulse_center": 0,
                     "max_vel": 500
                 },
@@ -41,7 +41,7 @@ def emio_motors():
                 {
                     "id": [0, 1, 2, 3],
                     "model": "XM430-W210",
-                    "length_to_rad": 0.05,
+                    "pulley_radius": 20,
                     "pulse_center": 2048,
                     "max_vel": 1000
                 },
@@ -58,8 +58,8 @@ def test_creation(motors):
     assert motors._motor_configs[1].id == 1, "Second motor ID mismatch."
     assert motors._motor_configs[0].model == "XM430-W210", "First motor model mismatch."
     assert motors._motor_configs[1].model == "L54-30-S400-R", "Second motor model mismatch."
-    assert motors._motor_configs[0].length_to_rad == 0.05, "First motor length_to_rad mismatch."
-    assert motors._motor_configs[1].length_to_rad == 0.05, "Second motor length_to_rad mismatch."
+    assert motors._motor_configs[0].pulley_radius == 20, "First motor pulley_radius mismatch."
+    assert motors._motor_configs[1].pulley_radius == 20, "Second motor pulley_radius mismatch."
     assert motors._motor_configs[0].pulse_center == 2048, "First motor pulse_center mismatch."
     assert motors._motor_configs[1].pulse_center == 0, "Second motor pulse_center mismatch."
     assert motors._motor_configs[0].max_vel == 1000, "First motor max_vel mismatch."
