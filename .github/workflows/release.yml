@@ -75,7 +75,10 @@ jobs:
           echo "RELEASE_DATE=$releaseDate" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Delete release and tag
-        run: gh release delete release-${{ github.ref_name }} --cleanup-tag
+        shell: bash
+        run: |
+            gh release delete release-${{ github.ref_name }} --cleanup-tag --yes || true
+            gh api --method DELETE repos/${{ github.repository }}/git/refs/tags/release-${{ github.ref_name }} || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
