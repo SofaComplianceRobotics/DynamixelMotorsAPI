@@ -87,13 +87,22 @@ class DynamixelMotors:
     #####################
 
 
-    def __init__(self, motor_configs: List[MotorConfig]):
+    def __init__(self, motor_configs: List[MotorConfig]|List[dict]):
         """
         Args:
             motor_configs: list of MotorConfig, one per motor, ordered by motor index.
         """
         self._lock = Lock()
-        self._motor_configs = motor_configs
+        
+        # Normalize: if dicts were passed, unwrap and convert to MotorConfig
+        if motor_configs and isinstance(motor_configs[0], dict):
+            dicts = []
+            for d in motor_configs:
+                dicts.extend(self.__unwrap_dict(d))
+            self._motor_configs = [MotorConfig.from_dict(m) for m in dicts]
+        else:
+            self._motor_configs = motor_configs
+        
         n = len(motor_configs)
         self._goal_velocity = [0] * n
         self._goal_position = [0] * n
@@ -156,11 +165,7 @@ class DynamixelMotors:
         ]
         ```
         """
-        dicts = []
-        for d in data:
-            dicts.extend(cls.__unwrap_dict(d))
-        motor_configs = [MotorConfig.from_dict(m) for m in dicts]
-        return cls(motor_configs)
+        return cls(data)
     
     
     @classmethod
@@ -197,8 +202,7 @@ class DynamixelMotors:
         }
         ```
         """
-        motor_dicts = cls.__unwrap_dict(data)
-        return  cls([MotorConfig.from_dict(m) for m in motor_dicts])
+        return cls([data])
 
 
     @classmethod
