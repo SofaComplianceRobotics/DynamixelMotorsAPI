@@ -7,14 +7,6 @@ import dynamixelmotorsapi._motorgroup as motorgroup
 from dynamixelmotorsapi._dynamixelmotorsconfigs import MotorConfig
 from dynamixelmotorsapi._logging_config import logger
 
-from dynamixelmotorsapi._dynamixelmotorsconfigs import register_model_from_json, MODELS_CONFIGS
-try:
-    loaded_models = register_model_from_json("./dynamixelmotorsapi/dynamixel_configs.json", overwrite=True)
-    if len(loaded_models):
-        logger.info(f"Loaded  {len(MODELS_CONFIGS)}  motor configs")
-except Exception as e:
-    logger.error(f"Failed to load motor configs from JSON: {e}")
-
 
 class DynamixelMotors:
     """

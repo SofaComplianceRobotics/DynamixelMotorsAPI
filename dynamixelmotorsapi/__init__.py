@@ -1,4 +1,17 @@
+from importlib.resources import files
+
 from .dynamixelmotors import DynamixelMotors, motorgroup
+from dynamixelmotorsapi._dynamixelmotorsconfigs import register_model_from_json, MODELS_CONFIGS
+from dynamixelmotorsapi._logging_config import logger
+
+try:
+    _config_path = files("dynamixelmotorsapi").joinpath("dynamixel_configs.json")
+    loaded_models = register_model_from_json(_config_path, overwrite=True)
+    if len(loaded_models):
+        logger.info(f"Loaded  {len(MODELS_CONFIGS)}  motor configs")
+except Exception as e:
+    logger.error(f"Failed to load motor configs from JSON: {e}")
+
 
 @staticmethod
 def listFTDIDevices() -> list:
