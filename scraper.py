@@ -74,6 +74,11 @@ REGISTER_MAP = [
     # Current
     ("present current",        "addr_present_current",     "len_present_current",     "initial_present_current"),
 
+    # PWM
+    ("goal pwm",               "addr_goal_pwm",            "len_goal_pwm",            "initial_goal_pwm"),
+    ("present pwm",            "addr_present_pwm",         "len_present_pwm",         "initial_present_pwm"),
+    ("pwm limit",              "addr_pwm_limit",           "len_pwm_limit",           "initial_pwm_limit"),
+
     # Velocity
     ("goal velocity",          "addr_goal_velocity",       "len_goal_velocity",       "initial_goal_velocity"),
     ("present velocity",       "addr_present_velocity",    "len_present_velocity",    "initial_present_velocity"),
@@ -303,8 +308,6 @@ def parse_current_unit(soup: BeautifulSoup) -> Optional[float]:
 def map_registers(registers: dict) -> dict:
     """Apply REGISTER_MAP to produce ModelConfig-compatible field dict."""
     result = {}
-
-    print("Extracted register: \n", registers.keys())
     # print(REGISTER_MAP)
 
     for reg_name, reg_data in registers.items():
@@ -317,8 +320,6 @@ def map_registers(registers: dict) -> dict:
                         if ini_field:
                             result[ini_field] = reg_data["initial"]
                 break
-
-    print(result)
     return result
 
 

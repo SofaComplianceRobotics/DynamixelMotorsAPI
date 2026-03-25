@@ -59,7 +59,7 @@ if __name__ == "__main__":
                 "pulley_radius": [20]*3, # radius of the pulley in mm
                 "pulse_center": [2048]*3,
                 "max_vel": [1000]*3,
-                "baud_rate": [4000000]*3
+                "baud_rate": [1000000]*3
             }
         ]
         

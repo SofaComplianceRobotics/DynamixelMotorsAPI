@@ -15,6 +15,8 @@ TORQUE_DISABLE    = 0
 VELOCITY_MODE     = 1
 POSITION_MODE     = 3
 EXT_POSITION_MODE = 4
+PWM_MODE          = 16
+CURRENT_MODE      = 0
 
 
 @dataclass(frozen=True)
@@ -60,6 +62,12 @@ class ModelConfig:
     addr_present_current:     Optional[int] = None
     len_present_current:      Optional[int] = None
     current_unit:             Optional[float] = None
+    addr_goal_pwm:            Optional[int] = None
+    len_goal_pwm:             Optional[int] = None
+    addr_present_pwm:         Optional[int] = None
+    len_present_pwm:          Optional[int] = None
+    addr_pwm_limit:           Optional[int] = None
+    len_pwm_limit:            Optional[int] = None
     min_position_value:       Optional[int] = None
     max_position_value:       Optional[int] = None
 
@@ -105,7 +113,13 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_position_d_gain      = 2,
         addr_present_current     = 126,
         len_present_current      = 2,
-        current_unit              = 2.69,  # mA per unit
+        current_unit             = 2.69,  # mA per unit
+        addr_goal_pwm            = 524,
+        len_goal_pwm             = 2,
+        addr_present_pwm         = 544,
+        len_present_pwm          = 2,
+        addr_pwm_limit           = 64,
+        len_pwm_limit            = 2,
         min_position_value       = 0,
         max_position_value       = 4095,
     ),
@@ -181,6 +195,12 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         addr_present_current     = 574,
         len_present_current      = 2,
         current_unit              = 1,  # mA per unit
+        addr_goal_pwm            = 548,
+        len_goal_pwm             = 2,
+        addr_present_pwm         = 572,
+        len_present_pwm          = 2,
+        addr_pwm_limit           = 36,
+        len_pwm_limit            = 2,
         min_position_value       = -150000,
         max_position_value       = 150000,
     ),

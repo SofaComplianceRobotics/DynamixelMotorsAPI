@@ -10,7 +10,7 @@ from dynamixel_sdk import *
 
 from dynamixelmotorsapi._dynamixelmotorsconfigs import (
     MotorConfig, ModelConfig, PROTOCOL_VERSION, TORQUE_ENABLE, TORQUE_DISABLE, 
-    VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE
+    VELOCITY_MODE, POSITION_MODE, EXT_POSITION_MODE, PWM_MODE, CURRENT_MODE
 )
 from dynamixelmotorsapi._logging_config import logger
 
@@ -144,68 +144,86 @@ class MotorGroup:
 
             readers = {
                 "position": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_present_position, sc.len_present_position),
+                                self.portHandler, self.packetHandler,
+                                sc.addr_present_position, sc.len_present_position),
                 "velocity": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_present_velocity, sc.len_present_velocity),
+                                self.portHandler, self.packetHandler,
+                                sc.addr_present_velocity, sc.len_present_velocity),
                 "goal_position": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_goal_position, sc.len_goal_position),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_goal_position, sc.len_goal_position),
                 "goal_velocity": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_goal_velocity, sc.len_goal_velocity),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_goal_velocity, sc.len_goal_velocity),
                 "velocity_profile": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_velocity_profile, sc.len_goal_velocity),
+                                        self.portHandler, self.packetHandler,
+                                        sc.addr_velocity_profile, sc.len_goal_velocity),
                 "moving": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_moving, 1),
+                            self.portHandler, self.packetHandler,
+                            sc.addr_moving, 1),
                 "moving_status": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_moving_status, 1),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_moving_status, 1),
                 "velocity_trajectory": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_velocity_trajectory, sc.len_velocity_trajectory),
+                                        self.portHandler, self.packetHandler,
+                                        sc.addr_velocity_trajectory, sc.len_velocity_trajectory),
                 "position_trajectory": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_trajectory, sc.len_position_trajectory),
+                                        self.portHandler, self.packetHandler,
+                                        sc.addr_position_trajectory, sc.len_position_trajectory),
                 "position_p_gain": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_p_gain, sc.len_position_p_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_p_gain, sc.len_position_p_gain),
                 "position_i_gain": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_i_gain, sc.len_position_i_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_i_gain, sc.len_position_i_gain),
                 "position_d_gain": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_d_gain, sc.len_position_d_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_d_gain, sc.len_position_d_gain),
                 "present_current": GroupSyncRead(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_present_current, sc.len_present_current),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_present_current, sc.len_present_current),
+                "pwm": GroupSyncRead(self.portHandler, self.packetHandler,
+                        sc.addr_present_pwm,
+                        sc.len_present_pwm),
+                "pwm_limit": GroupSyncRead(self.portHandler, self.packetHandler,
+                                sc.addr_pwm_limit,
+                                sc.len_pwm_limit),
+                "goal_pwm": GroupSyncRead(self.portHandler, self.packetHandler,
+                                sc.addr_goal_pwm,
+                                sc.len_goal_pwm)
             }
 
             writers = {
                 "goal_position": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_goal_position, sc.len_goal_position),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_goal_position, sc.len_goal_position),
                 "goal_velocity": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_goal_velocity, sc.len_goal_velocity),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_goal_velocity, sc.len_goal_velocity),
                 "velocity_profile": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_velocity_profile, sc.len_goal_velocity),
+                                        self.portHandler, self.packetHandler,
+                                        sc.addr_velocity_profile, sc.len_goal_velocity),
                 "position_p_gain": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_p_gain, sc.len_position_p_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_p_gain, sc.len_position_p_gain),
                 "position_i_gain": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_i_gain, sc.len_position_i_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_i_gain, sc.len_position_i_gain),
                 "position_d_gain": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_position_d_gain, sc.len_position_d_gain),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_position_d_gain, sc.len_position_d_gain),
                 "present_current": GroupSyncWrite(
-                    self.portHandler, self.packetHandler,
-                    sc.addr_present_current, sc.len_present_current),
+                                    self.portHandler, self.packetHandler,
+                                    sc.addr_present_current, sc.len_present_current),
+                "pwm": GroupSyncWrite(self.portHandler, self.packetHandler,
+                        sc.addr_present_pwm,
+                        sc.len_present_pwm),
+                "pwm_limit": GroupSyncWrite(self.portHandler, self.packetHandler,
+                                sc.addr_pwm_limit,
+                                sc.len_pwm_limit),
+                "goal_pwm": GroupSyncWrite(self.portHandler, self.packetHandler,
+                                sc.addr_goal_pwm,
+                                sc.len_goal_pwm)
             }
 
             # Register all motor IDs in this model with every reader
@@ -259,10 +277,11 @@ class MotorGroup:
         logger.debug(f"Device name updated to: {self.deviceName}")
 
 
-    def open(self) -> None:
-        """Open the port and set the baud rate."""
+    def openPort(self) -> None:
+        """Open the port"""
         try:
             self.portHandler.openPort()
+            logger.debug(f"Port opened")
         except Exception as e:
             raise Exception(f"Failed to open port: {e}")
         
@@ -277,6 +296,8 @@ class MotorGroup:
                 )
             self.portHandler.closePort()
             self.deviceName = None
+        
+            logger.debug(f"Closed port and disabled torque")
         except Exception as e:
             raise Exception(f"Failed to close port: {e}")
         
@@ -287,6 +308,7 @@ class MotorGroup:
             raise DisconnectedException()
         if self.portHandler:
             self.portHandler.clearPort()
+            logger.debug(f"Port cleared")
 
     # ------------------------------------------------------------------ #
     #  Torque and operating mode                                           #
@@ -295,11 +317,13 @@ class MotorGroup:
     def enableTorque(self):
         """Enable torque on all motors."""
         self._write1ByteAll(lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_ENABLE)
+        logger.debug(f"Torque enabled")
 
 
     def disableTorque(self):
         """Disable torque on all motors."""
         self._write1ByteAll(lambda cfg: cfg.model_config.addr_torque_enable, TORQUE_DISABLE)
+        logger.debug(f"Torque disabled")
 
 
     def isTorqueEnable(self) -> list:
@@ -316,6 +340,7 @@ class MotorGroup:
             if dxl_error != 0:
                 raise Exception(f"Failed to read torque (motor {cfg.id}): "
                                 f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            
             result.append(torque)
         return result
     
@@ -328,8 +353,11 @@ class MotorGroup:
             mode: 1=Velocity, 3=Position, 4=Extended Position.
                   See https://emanual.robotis.com/docs/en/dxl/x/xc330-t288/#operating-mode
         """
-        if not self.isConnected:
-            raise DisconnectedException()
+        for cfg in self.motorsConfig:
+            self.portHandler.setBaudRate(cfg.baud_rate)
+            torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
+                self.portHandler, cfg.id, cfg.model_config.addr_torque_enable
+            )
         self._write1ByteAll(lambda cfg: cfg.model_config.addr_operating_mode, mode)
 
 
@@ -340,6 +368,7 @@ class MotorGroup:
         self.__setOperatingMode(VELOCITY_MODE)
         if any(t == 1 for t in torques):
             self.enableTorque()
+        logger.debug(f"Enabled Velocity Mode")
 
 
     def enablePositionMode(self):
@@ -349,6 +378,7 @@ class MotorGroup:
         self.__setOperatingMode(POSITION_MODE)
         if any(t == 1 for t in torques):
             self.enableTorque()
+        logger.debug(f"Enabled Position Mode")
 
 
     def enableExtendedPositionMode(self):
@@ -358,6 +388,28 @@ class MotorGroup:
         self.__setOperatingMode(EXT_POSITION_MODE)
         if any(t == 1 for t in torques):
             self.enableTorque()
+        logger.debug(f"Enabled Extended Position Mode")
+
+    
+    def enablePWMMode(self):
+        torques = self.isTorqueEnable()
+
+        if any(t==1 for t in torques):
+            self.disableTorque()
+        self.__setOperatingMode(PWM_MODE)
+        if any(t==1 for t in torques):
+            self.enableTorque()
+
+
+    def enableCurrentMode(self):
+        torques = self.isTorqueEnable()
+
+        if any(t==1 for t in torques):
+            self.disableTorque()
+        self.__setOperatingMode(CURRENT_MODE)
+        if any(t==1 for t in torques):
+            self.enableTorque()
+
 
     def getBaudRate(self) -> list:
         """Get the baud rate for each motor."""
@@ -372,6 +424,7 @@ class MotorGroup:
             if dxl_error != 0:
                 raise Exception(f"Failed to read baud rate (motor {cfg.id}): "
                                 f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            
             result.append(baud_rate)
         return result
 
@@ -387,8 +440,6 @@ class MotorGroup:
             addr_fn: callable(MotorConfig) -> int, returns the register address for that motor.
             value:   the byte value to write.
         """
-        if not self.isConnected:
-            raise DisconnectedException()
         for cfg in self.motorsConfig:
             addr = addr_fn(cfg)
             
@@ -403,6 +454,7 @@ class MotorGroup:
             if dxl_error != 0:
                 raise Exception(f"Error on motor {cfg.id} at addr {addr}: "
                                 f"{self.packetHandler.getRxPacketError(dxl_error)}")
+            
             logger.debug(f"Motor {cfg.id}: addr {addr} set to {value}")
 
     def _readSyncMotorsData(self, reader_name: str) -> list:
@@ -416,9 +468,6 @@ class MotorGroup:
         Returns:
             List of values in motor_configs order.
         """
-        if not self.isConnected:
-            raise DisconnectedException()
-
         # Collect results keyed by motor ID across all models
         results_by_id = {}
         for model_name, readers in self.groupReaders.items():
@@ -432,6 +481,7 @@ class MotorGroup:
                     f"Failed to read '{reader_name}' for model '{model_name}': "
                     f"{self.packetHandler.getTxRxResult(dxl_comm_result)}"
                 )
+            
             for cfg in self._models_groups[model_name]:
                 if not group.isAvailable(cfg.id, group.start_address, group.data_length):
                     raise Exception(
@@ -453,9 +503,6 @@ class MotorGroup:
             writer_name: key into self.groupWriters[model].
             values:      list of values in motor_configs order.
         """
-        if not self.isConnected:
-            raise DisconnectedException()
-
         # Map motor ID -> value from the ordered values list
         values_by_id = {cfg.id: values[i] for i, cfg in enumerate(self.motorsConfig)}
 
@@ -472,7 +519,14 @@ class MotorGroup:
                 else:
                     raise Exception(f"Unsupported data length: {group.data_length}")
                 group.addParam(cfg.id, data)
-            group.txPacket()
+                
+
+            dxl_comm_result = group.txPacket()
+            if dxl_comm_result != COMM_SUCCESS:
+                raise Exception(
+                    f"Failed to read '{writer_name}' for model '{model_name}': "
+                    f"{self.packetHandler.getTxRxResult(dxl_comm_result)}"
+                )
 
 
     # ------------------------------------------------------------------ #
@@ -482,32 +536,55 @@ class MotorGroup:
     def setGoalPosition(self, positions: list):
         """Set the goal position (pulses) for each motor."""
         self.__writeSyncMotorsData("goal_position", positions)
+        logger.debug(f"Goal Position set to {positions}")
 
     def setGoalVelocity(self, speeds: list):
         """Set the goal velocity for each motor."""
         self.__writeSyncMotorsData("goal_velocity", speeds)
+        logger.debug(f"Goal Velocity set to {speeds}")
+
+    def setGoalPWM(self, pwms: list):
+        """Set the goal PWM for each motor.
+
+        Args:
+            pwms (list of numbers): unit depends on motor type
+        """
+        self.__writeSyncMotorsData(self.groupWriters["goal_pwm"] , pwms)
+
+    def setPWMLimit(self, limits: list):
+        """Set the PWM limit for each motor.
+
+        Args:
+            limits (list of numbers): unit depends on motor type
+        """
+        self.__writeSyncMotorsData(self.groupWriters["pwm_limit"] , limits)
 
     def setVelocityProfile(self, max_vel: list):
         """Set the maximum velocity profile (position mode) for each motor."""
         self.__writeSyncMotorsData("velocity_profile", max_vel)
+        logger.debug(f"Velocity profile set to {max_vel}")
 
     def setPositionPGain(self, p_gains: list):
         """Set the position P gain for each motor."""
         self.__writeSyncMotorsData("position_p_gain", p_gains)
+        logger.debug(f"Position P gains set to {p_gains}")
 
     def setPositionIGain(self, i_gains: list):
         """Set the position I gain for each motor."""
         self.__writeSyncMotorsData("position_i_gain", i_gains)
+        logger.debug(f"Position I gains set to {i_gains}")
 
     def setPositionDGain(self, d_gains: list):
         """Set the position D gain for each motor."""
         self.__writeSyncMotorsData("position_d_gain", d_gains)
+        logger.debug(f"Position D gains set to {d_gains}")
 
     def setPresentCurrent(self, currents: list):
         """Set the present current for each motor."""
         self.__writeSyncMotorsData("present_current", currents)
+        logger.debug(f"Present Current set to {currents}")
 
-    def getCurrentPosition(self) -> list:
+    def getPresentPosition(self) -> list:
         """Get the current position (pulses) for each motor."""
         return self._readSyncMotorsData("position")
 
@@ -518,8 +595,16 @@ class MotorGroup:
     def getGoalVelocity(self) -> list:
         """Get the goal velocity for each motor."""
         return self._readSyncMotorsData("goal_velocity")
+    
+    def getGoalPWM(self) -> list:
+        """Get the goal PWM for each motor."""
+        return self._readSyncMotorsData("goal_pwm")
+    
+    def getPWMLimit(self) -> list:
+        """Get the PWM limit for each motor."""
+        return self._readSyncMotorsData("pwm_limit")
 
-    def getCurrentVelocity(self) -> list:
+    def getPresentVelocity(self) -> list:
         """Get the current velocity for each motor."""
         return self._readSyncMotorsData("velocity")
     
@@ -558,3 +643,7 @@ class MotorGroup:
     def getPresentCurrent(self) -> list:
         """Get the present current for each motor."""
         return self._readSyncMotorsData("present_current")
+    
+    def getPresentPWM(self) -> list:
+        """Get the present PWM for each motor."""
+        return self._readSyncMotorsData("pwm")

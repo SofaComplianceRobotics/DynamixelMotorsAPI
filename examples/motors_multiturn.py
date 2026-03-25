@@ -48,8 +48,7 @@ if __name__ == "__main__":
         logger.info("Starting DynamixelMotors API test...")
         logger.info("Opening and configuring DynamixelMotors API...")
 
-        motors_description = [
-            {
+        motors_description = {
                 "id": [0, 1, 2, 3],
                 "model": "XM430-W210",
                 "pulley_radius": [20]*4, # radius of the pulley in mm
@@ -57,7 +56,6 @@ if __name__ == "__main__":
                 "max_vel": [1000, 500, 600, 300],
                 "baud_rate": 1000000
             }
-        ]
         
         robot_motors = DynamixelMotors.from_dict(motors_description)
 

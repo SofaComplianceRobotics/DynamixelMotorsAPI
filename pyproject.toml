@@ -23,6 +23,8 @@ authors = [
 [project.urls]
 Repository = "https://github.com/SofaComplianceRobotics/DynamixelMotors.API"
 
+[tool.setuptools.package-data]
+dynamixelmotorsapi = ["*dynamixel_configs.json"]
 
 #######
 # Configuration for pydoc-markdown

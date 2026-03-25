@@ -76,8 +76,9 @@ class DynamixelMotors:
     _initialized: bool = False
 
     _motor_configs: List[MotorConfig] = None
-    _goal_velocity: list = None  # store the last commanded velocity in rev/min, per motor
-    _goal_position: list = None  # store the last commanded position in radians
+    _goal_velocities: list = None  # store the last commanded velocity in rev/min, per motor
+    _goal_positions: list = None  # store the last commanded position in pulses
+    _goal_pwms: list = None  # store the last commanded PWM, per motor
     _mg: motorgroup.MotorGroup = None
     _device_index: int = None
 
@@ -103,12 +104,13 @@ class DynamixelMotors:
         else:
             self._motor_configs = motor_configs
         
-        n = len(motor_configs)
-        self._goal_velocity = [0] * n
-        self._goal_position = [0] * n
+        n = len(self._motor_configs)
+        self._goal_velocities = [0] * n
+        self._goal_positions = [0] * n
+        self._goal_pwms = [0] * n
 
         if not self._initialized:
-            self._mg = motorgroup.MotorGroup(motor_configs)
+            self._mg = motorgroup.MotorGroup(self._motor_configs)
             self._initialized = True
 
     @staticmethod
@@ -303,7 +305,7 @@ class DynamixelMotors:
                     logger.error("Device name is None. Please check the connection.")
                     return False
 
-                self._mg.open()
+                self._mg.openPort()
                 self._mg.disableTorque()
                 self._mg.clearPort()
                 if multi_turn:
@@ -390,7 +392,7 @@ class DynamixelMotors:
     def printStatus(self):
         """Print the current position of the motors in radians, pulses, and degrees."""
         with self._lock:
-            current_pos = self._mg.getCurrentPosition()
+            current_pos = self._mg.getPresentPosition()
             rads    = self.pulseToRad(current_pos)
             degrees = self.pulseToDeg(current_pos)
             logger.info(
@@ -446,47 +448,74 @@ class DynamixelMotors:
 
                 
     @property
+    def goal_angles(self) -> list:
+        """Get the last commanded angles of the motors in radians."""
+        return self.pulseToRad(self._goal_positions)
+    
+    @property
     def angles(self) -> list:
         """Get the current angles of the motors in radians."""
         with self._lock:
-            return self.pulseToRad(self._mg.getCurrentPosition())
+            return self.pulseToRad(self._mg.getPresentPosition())
 
     @angles.setter
     def angles(self, angles: list):
         """Set the goal angles of the motors in radians."""
         with self._lock:
-            self._goal_position = angles
+            self._goal_positions = angles
             self._mg.setGoalPosition([
                 int(cfg.pulse_center - cfg.rad_to_pulse * a)
                 for a, cfg in zip(angles, self._motor_configs)
             ])
 
+    @property
+    def goal_positions(self) -> list:
+        """Get the last commanded positions of the motors in pulses."""
+        return self._goal_positions
     
     @property
     def positions(self) -> list:
         """Get the current positions of the motors in pulses."""
         with self._lock:
-            return self._mg.getCurrentPosition()
+            return self._mg.getPresentPosition()
         
     @positions.setter
     def positions(self, positions: list):
         """Set the goal positions of the motors in pulses."""
         with self._lock:
-            self._goal_position = self.pulseToRad(positions)
+            self._goal_positions = self.pulseToRad(positions)
             self._mg.setGoalPosition(positions)
 
 
     @property
-    def goal_velocity(self) -> list:
+    def goal_velocities(self) -> list:
         """Get the last commanded velocity (rev/min) for each motor."""
-        return self._goal_velocity
+        return self._goal_velocities
 
-    @goal_velocity.setter
-    def goal_velocity(self, velocities: list):
+    @goal_velocities.setter
+    def goal_velocities(self, velocities: list):
         """Set the goal velocity (rev/min) for each motor."""
-        self._goal_velocity = velocities
+        self._goal_velocities = velocities
         with self._lock:
             self._mg.setGoalVelocity(velocities)
+
+    @property
+    def goal_pwms(self) -> list:
+        """Get the last commanded PWM for each motor."""
+        return self._goal_pwms
+    
+    @property
+    def pwms(self) -> list:
+        """Get the current PWM of the motors."""
+        with self._lock:
+            return self._mg.getPresentPWM()
+        
+    @pwms.setter
+    def pwms(self, pwms: list):
+        """Set the goal PWM for each motor."""
+        self._goal_pwms = pwms
+        with self._lock:
+            self._mg.setGoalPWM(pwms)
 
 
     @property
@@ -621,7 +650,7 @@ class DynamixelMotors:
     def velocity(self) -> list:
         """Get the current velocity (rev/min) of the motors."""
         with self._lock:
-            return self._mg.getCurrentVelocity()
+            return self._mg.getPresentVelocity()
 
     @property
     def velocity_trajectory(self) -> list:
