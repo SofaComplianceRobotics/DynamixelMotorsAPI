@@ -11,16 +11,6 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/..')
 from dynamixelmotorsapi import DynamixelMotors
 from dynamixelmotorsapi._logging_config import logger
 
-class MyDynamixelMotors(DynamixelMotors):
-    _length_to_rad = 1.0 / 20.0  # 1/radius of the pulley
-    _rad_to_pulse = 4096 / (2 * pi)  # the resolution of the Dynamixel xm430 w210
-    _pulse_center= 2048
-    _max_vel = 1000  # *0.01 rev/min
-
-    def __init__(self):
-        super().__init__() # Check if all parameters have been set
-
-
 def main(robot_motors: DynamixelMotors, loops=1):
 
     initial_pos_pulse = [0] * 4
@@ -57,8 +47,19 @@ if __name__ == "__main__":
     try:
         logger.info("Starting DynamixelMotors API test...")
         logger.info("Opening and configuring DynamixelMotors API...")
+
+        motors_description = {
+                "id": [0, 1, 2, 3],
+                "model": "XM430-W210",
+                "pulley_radius": [20]*4, # radius of the pulley in mm
+                "pulse_center": [2048]*4,
+                "max_vel": [1000, 500, 600, 300],
+                "baud_rate": 1000000
+            }
         
-        robot_motors = MyDynamixelMotors()
+        robot_motors = DynamixelMotors.from_dict(motors_description)
+
+        robot_motors.printConfig()
         
         if robot_motors.open(multi_turn=True): 
             

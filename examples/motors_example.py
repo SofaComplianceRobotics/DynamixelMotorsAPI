@@ -8,24 +8,13 @@ from math import pi
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/..')
 from dynamixelmotorsapi import DynamixelMotors
-from dynamixelmotorsapi._dynamixelmotorsparameters import DXL_IDs
 from dynamixelmotorsapi._logging_config import logger
 
 
-class MyDynamixelMotors(DynamixelMotors):
-    _length_to_rad = 1.0 / 20.0  # 1/radius of the pulley
-    _rad_to_pulse = 4096 / (2 * pi)  # the resolution of the Dynamixel xm430 w210
-    _pulse_center= 2048
-    _max_vel = 1000  # *0.01 rev/min
-
-    def __init__(self):
-        super().__init__() # Check if all parameters have been set
-
-
 def main(robot_motors: DynamixelMotors, loops=1):
-
-    initial_pos_pulse = [0] * len(DXL_IDs)
-    robot_motors.max_velocity = [1000] * len(DXL_IDs)
+    motors_count = robot_motors._motor_configs
+    initial_pos_pulse = [0] * len(motors_count)
+    robot_motors.max_velocity = [1000] * len(motors_count)
     logger.info(f"Initial position in rad: {initial_pos_pulse}")
     robot_motors.angles = initial_pos_pulse
     time.sleep(1)
@@ -33,7 +22,7 @@ def main(robot_motors: DynamixelMotors, loops=1):
 
 
     for i in range(loops):
-        new_pos = [((2*3.14)*((i+1)%8)/8)] * len(DXL_IDs)
+        new_pos = [((2*3.14)*((i+1)%8)/8)] * len(motors_count)
         print("-"*20)
         logger.info(f"new_pos {new_pos}")
         try:
@@ -54,10 +43,44 @@ if __name__ == "__main__":
     try:
         logger.info("Starting DynamixelMotors API test...")
         logger.info("Opening and configuring Robot Motors API...")
+
+        motors_description = [
+            {
+                "id": 0,
+                "model": "XM430-W210",
+                "pulley_radius": 20,  # radius of the pulley in mm
+                "pulse_center": 2048,
+                "max_vel": 1000,
+                "baud_rate": 1000000,
+                "torque_points": [ 
+                    [0.406, 1.392],
+                    [0.496, 4.424],
+                    [0.586, 7.76],
+                    [0.671, 10.489],
+                    [0.761, 13.521],
+                    [0.851, 16.856],
+                    [0.941, 19.888],
+                    [1.031, 23.224] 
+                ]
+            },
+            {
+                "id": [1, 2, 3],
+                "model": ["XM430-W210"]*3,
+                "pulley_radius": [20]*3, # radius of the pulley in mm
+                "pulse_center": [2048]*3,
+                "max_vel": [1000]*3,
+                "baud_rate": [1000000]*3
+            }
+        ]
         
-        robot_motors = MyDynamixelMotors()
-        
-        if robot_motors.open(): 
+        robot_motors = DynamixelMotors.from_dicts(motors_description)
+        robot_motors.printConfig()
+
+        logger.info(f"Estimated torques for currents [3, 2, 3, 2] mA: {robot_motors.current_to_torque([3, 2, 3, 2])}") # estimate of torque for each motor based on current in mA
+        logger.info(f"Estimated torque for motor 0 with 3 mA current: {robot_motors.current_to_torque(3, motor_idx=0)}") # estimate of torque for motor 0 based on current in mA
+
+        if robot_motors.open():
+
             
             robot_motors.printStatus()
 
