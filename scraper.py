@@ -23,7 +23,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-from extract_curve import extract_torque_current_points
+from extract_torque_curve import extract_torque_current_points
 
 logging.basicConfig(
     level=logging.INFO,
