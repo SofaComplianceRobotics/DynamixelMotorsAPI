@@ -22,6 +22,9 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 
+
+from extract_curve import extract_torque_current_points
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-7s  %(message)s",
@@ -323,6 +326,27 @@ def map_registers(registers: dict) -> dict:
     return result
 
 
+def extract_torque_points(soup: BeautifulSoup) -> Optional[list[tuple[float, float]]]:
+    """
+    Extract torque-current curve points from the "Torque Limit" section, if available.
+    Returns a list of (current_mA, torque_Nm) tuples.
+    """
+    img_tag = soup.css.select_one("h2[id*='performance-graph'] ~ p img")
+    if not img_tag:
+        return None
+    graph_path = None 
+    src = img_tag.get("src")
+    # download the image and extract points using the extract_curve module
+    if src.startswith("http"):
+        graph_path = src
+    else:
+        graph_path = BASE_URL + src if src.startswith("/") else BASE_URL + "/" + src
+    
+    points = extract_torque_current_points(graph_path)[0]
+
+    return points if points else None
+
+
 # ── Main per-motor scrape ──────────────────────────────────────────────────────
 
 def scrape_motor(model: str, url: str) -> MotorConfig:
@@ -352,6 +376,15 @@ def scrape_motor(model: str, url: str) -> MotorConfig:
 
     # 4. Get current unit
     config.current_unit = parse_current_unit(soup)
+
+    # 5. Extract torque to current curve points for estimation if available
+    torque_points = []
+    try:
+        torque_points = extract_torque_points(soup)
+        if torque_points:
+            config.torque_points = torque_points
+    except Exception as e:
+        log.warning(f"  Could not extract torque-current points: {e}")
     
 
     return config
@@ -380,7 +413,10 @@ def main():
     # Write output
     out_path = "./dynamixelmotorsapi/dynamixel_configs.json"
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+        jsonStr = json.dumps(results, indent=2, ensure_ascii=False)
+        reg = re.compile(r'\[\n\s*(-?[\d\.\n\s]+),\n\s*(-?[\d\.]+)[\n\s]*\]') # Remove indentation in lists
+        formatted = reg.sub(r'[\1, \2]', jsonStr)
+        f.write(formatted)
 
     log.info(f"\n✓  Wrote {len(results)} configs to {out_path}")
     if errors:

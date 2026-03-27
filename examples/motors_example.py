@@ -51,7 +51,17 @@ if __name__ == "__main__":
                 "pulley_radius": 20,  # radius of the pulley in mm
                 "pulse_center": 2048,
                 "max_vel": 1000,
-                "baud_rate": 1000000
+                "baud_rate": 1000000,
+                "torque_points": [ 
+                    [0.406, 1.392],
+                    [0.496, 4.424],
+                    [0.586, 7.76],
+                    [0.671, 10.489],
+                    [0.761, 13.521],
+                    [0.851, 16.856],
+                    [0.941, 19.888],
+                    [1.031, 23.224] 
+                ]
             },
             {
                 "id": [1, 2, 3],
@@ -64,8 +74,13 @@ if __name__ == "__main__":
         ]
         
         robot_motors = DynamixelMotors.from_dicts(motors_description)
-        
-        if robot_motors.open(): 
+        robot_motors.printConfig()
+
+        print("Estimated torques for currents [3, 2, 3, 2] mA:", robot_motors.current_to_torque([3, 2, 3, 2])) # estimate of torque for each motor based on current in mA
+        print("Estimated torque for motor 0 with 3 mA current:", robot_motors.current_to_torque(3, motor_idx=0)) # estimate of torque for motor 0 based on current in mA
+
+        if robot_motors.open():
+
             
             robot_motors.printStatus()
 

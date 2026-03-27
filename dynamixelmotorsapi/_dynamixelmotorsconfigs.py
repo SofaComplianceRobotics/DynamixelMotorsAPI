@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from math import pi
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 
 # DYNAMIXEL Protocol Version (1.0 / 2.0)
@@ -70,6 +70,7 @@ class ModelConfig:
     len_pwm_limit:            Optional[int] = None
     min_position_value:       Optional[int] = None
     max_position_value:       Optional[int] = None
+    torque_points:            Optional[List[Tuple[float, float]]] = None
 
     @property
     def rad_to_pulse(self) -> float:
@@ -333,14 +334,15 @@ class MotorConfig:
         ```
     """
     id:            int
-    pulley_radius:  float
+    pulley_radius: float
     pulse_center:  int
     max_vel:       float
     baud_rate:     int
 
     # Provide one of these — not both (unless consistent), not neither
-    model:        Optional[str]          = None
+    model:        Optional[str] = None
     model_config: Optional[ModelConfig] = None
+    torque_points:  Optional[List[Tuple[float]]] = None
 
     def __post_init__(self):
         if self.model_config is not None and self.model is not None:
@@ -368,6 +370,10 @@ class MotorConfig:
                     f"or pass a ModelConfig directly."
                 )
             self.model_config = MODELS_CONFIGS[self.model]
+            
+            if self.torque_points is None:
+                self.torque_points = self.model_config.torque_points
+
             return
 
         raise ValueError(
@@ -402,4 +408,5 @@ class MotorConfig:
             pulse_center  = data["pulse_center"],
             max_vel       = data["max_vel"],
             baud_rate     = data["baud_rate"],
+            torque_points = data["torque_points"] if "torque_points" in data.keys() else None
         )

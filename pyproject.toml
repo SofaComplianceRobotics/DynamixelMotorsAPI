@@ -13,6 +13,10 @@ dependencies = [
     "numpy==1.26.4",
     "requests",
     "beautifulsoup4>=4.7.0",
+    "opencv-python>=4.11.0.86",
+    "pillow>=12.1.1",
+    "easyocr>=1.7.2",
+    "opencv-contrib-python>=4.11.0.86",
 ]
 description = "An API for controlling  the motors of a group of Dynamixel motors."
 keywords = ["robotics", "api", "dynamixel"]

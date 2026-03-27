@@ -1,10 +1,10 @@
 from threading import Lock
 from math import pi
 from typing import List
-import json
+import numpy as np
 
 import dynamixelmotorsapi._motorgroup as motorgroup
-from dynamixelmotorsapi._dynamixelmotorsconfigs import MotorConfig
+from dynamixelmotorsapi._dynamixelmotorsconfigs import MotorConfig, MODELS_CONFIGS
 from dynamixelmotorsapi._logging_config import logger
 
 
@@ -73,6 +73,7 @@ class DynamixelMotors:
     _goal_pwms: list = None  # store the last commanded PWM, per motor
     _mg: motorgroup.MotorGroup = None
     _device_index: int = None
+    _torque_polys: dict[int, List[float]] = None
 
 
     #####################
@@ -104,6 +105,15 @@ class DynamixelMotors:
         if not self._initialized:
             self._mg = motorgroup.MotorGroup(self._motor_configs)
             self._initialized = True
+            
+            for cfg in self._motor_configs:
+                if cfg.torque_points is None:
+                    break
+                _I = np.array([pt[1] for pt in cfg.torque_points])
+                _T = np.array([pt[0] for pt in cfg.torque_points])
+                self._torque_polys = {} if self._torque_polys is None else self._torque_polys
+                self._torque_polys[cfg.id] = np.polyfit(_I, _T, 2)
+
 
     @staticmethod
     def listMotorsModels() -> list:
@@ -404,7 +414,8 @@ class DynamixelMotors:
                 f"  Model: {cfg.model}\n"
                 f"  Length to rad conversion: {cfg.length_to_rad}\n"
                 f"  Pulse center: {cfg.pulse_center}\n"
-                f"  Max velocity: {cfg.max_vel}"
+                f"  Max velocity: {cfg.max_vel}\n"
+                f"  Torque Points: {cfg.torque_points}\n"
             )
 
 
@@ -414,6 +425,43 @@ class DynamixelMotors:
 
     def enableExtendedPositionMode(self):
         self._mg.enableExtendedPositionMode()
+
+    
+    def current_to_torque(self, currents_mA: List[float]|float, motor_idx: int = None) -> List[float]|float:
+        """
+        Estimate torque (N·mm) from the measured currents (mA) using the polynomial
+        T(I) fitted for the model of the given motor index.
+
+        The fit is quadratic in N·m (I in Amperes); the result is converted to N·mm.
+        Returns 0 for currents below the no-load threshold.
+
+        Args:
+            current_mA: signed current in milliamps (as returned by getCurrent_mA).
+            motor_idx:  index into the active motor list (used to look up the motor model).
+
+        Returns:
+            Estimated torque(s) in N·mm (always >= 0).
+        """
+        if motor_idx is None and isinstance(currents_mA, list):
+            print("POLYS ", self._torque_polys)
+            polys = [self._torque_polys.get(cfg.id) for cfg in self._motor_configs]
+            torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) for i, poly in enumerate(polys)]
+            return [max(0.0, torque_Nm * 1000000.0) for torque_Nm in torques_Nm]
+        elif motor_idx is not None:
+            if isinstance(currents_mA, list):
+                cfg = self._motor_configs[motor_idx]
+                poly = self._torque_polys.get(cfg.id)
+                if motor_idx >= len(currents_mA):
+                    raise ValueError(f"motor_idx {motor_idx} is out of range for the currents_mA list of length {len(currents_mA)}.")
+                torque_Nm = float(np.polyval(poly, currents_mA[motor_idx]/1000))
+                return max(0.0, torque_Nm * 1000000.0)
+            elif isinstance(currents_mA, (int, float)):
+                cfg = self._motor_configs[motor_idx]
+                poly = self._torque_polys.get(cfg.id)
+                torque_Nm = float(np.polyval(poly, currents_mA/1000))
+                return max(0.0, torque_Nm * 1000000.0)
+        else:
+            raise ValueError("Invalid input: currents_mA should be a list if motor_idx is None, or a single value if motor_idx is specified.")
 
 
     ####################
