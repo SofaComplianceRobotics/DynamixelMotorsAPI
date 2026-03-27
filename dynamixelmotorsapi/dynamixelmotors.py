@@ -419,12 +419,24 @@ class DynamixelMotors:
             )
 
 
-    def enablePositionMode(self):
-        self._mg.enablePositionMode()
+    def enablePositionMode(self, ids: List[int]=None):
+        self._mg.enablePositionMode(ids)
 
 
-    def enableExtendedPositionMode(self):
-        self._mg.enableExtendedPositionMode()
+    def enableExtendedPositionMode(self, ids: List[int]=None):
+        self._mg.enableExtendedPositionMode(ids)
+
+
+    def enableVelocityMode(self, ids: List[int]=None):
+        self._mg.enableVelocityMode(ids)
+
+    
+    def enablePWMMode(self, ids: List[int]=None):
+        self._mg.enablePWMMode(ids)
+
+    
+    def enableCurrentMode(self, ids: List[int]=None):
+        self._mg.enableCurrentMode(ids)    
 
     
     def current_to_torque(self, currents_mA: List[float]|float, motor_idx: int = None) -> List[float]|float:
@@ -443,7 +455,6 @@ class DynamixelMotors:
             Estimated torque(s) in N·mm (always >= 0).
         """
         if motor_idx is None and isinstance(currents_mA, list):
-            print("POLYS ", self._torque_polys)
             polys = [self._torque_polys.get(cfg.id) for cfg in self._motor_configs]
             torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) for i, poly in enumerate(polys)]
             return [max(0.0, torque_Nm * 1000000.0) for torque_Nm in torques_Nm]

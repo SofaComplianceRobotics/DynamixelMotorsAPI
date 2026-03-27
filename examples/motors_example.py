@@ -76,8 +76,8 @@ if __name__ == "__main__":
         robot_motors = DynamixelMotors.from_dicts(motors_description)
         robot_motors.printConfig()
 
-        print("Estimated torques for currents [3, 2, 3, 2] mA:", robot_motors.current_to_torque([3, 2, 3, 2])) # estimate of torque for each motor based on current in mA
-        print("Estimated torque for motor 0 with 3 mA current:", robot_motors.current_to_torque(3, motor_idx=0)) # estimate of torque for motor 0 based on current in mA
+        logger.info(f"Estimated torques for currents [3, 2, 3, 2] mA: {robot_motors.current_to_torque([3, 2, 3, 2])}") # estimate of torque for each motor based on current in mA
+        logger.info(f"Estimated torque for motor 0 with 3 mA current: {robot_motors.current_to_torque(3, motor_idx=0)}") # estimate of torque for motor 0 based on current in mA
 
         if robot_motors.open():
 

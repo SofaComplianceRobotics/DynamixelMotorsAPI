@@ -345,7 +345,7 @@ class MotorGroup:
         return result
     
 
-    def __setOperatingMode(self, mode: int):
+    def __setOperatingMode(self, mode: int, ids: int|List[int]=None):
         """
         Set the operating mode on all motors.
 
@@ -353,60 +353,69 @@ class MotorGroup:
             mode: 1=Velocity, 3=Position, 4=Extended Position.
                   See https://emanual.robotis.com/docs/en/dxl/x/xc330-t288/#operating-mode
         """
-        for cfg in self.motorsConfig:
-            self.portHandler.setBaudRate(cfg.baud_rate)
-            torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
-                self.portHandler, cfg.id, cfg.model_config.addr_torque_enable
-            )
-        self._write1ByteAll(lambda cfg: cfg.model_config.addr_operating_mode, mode)
+        if isinstance(mode, int):
+            self._write1ByteAll(lambda cfg: cfg.model_config.addr_operating_mode, mode)
+        else:
+            for cfg in self.motorsConfig:
+                if ids is None or cfg.id in ids:
+                    self.portHandler.setBaudRate(cfg.baud_rate)
+                    dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
+                        self.portHandler, cfg.id, cfg.model_config.addr_operating_mode, mode
+                    )
+                    if dxl_comm_result != COMM_SUCCESS:
+                        raise Exception(f"Failed to write operating mode (motor {cfg.id}): "
+                                        f"{self.packetHandler.getTxRxResult(dxl_comm_result)}")
+                    if dxl_error != 0:
+                        raise Exception(f"Failed to write operating mode (motor {cfg.id}): "
+                                        f"{self.packetHandler.getRxPacketError(dxl_error)}")
 
 
-    def enableVelocityMode(self):
+    def enableVelocityMode(self, ids: List[int]=None):
         torques = self.isTorqueEnable()
         if any(t == 1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(VELOCITY_MODE)
+        self.__setOperatingMode(VELOCITY_MODE, ids)
         if any(t == 1 for t in torques):
             self.enableTorque()
         logger.debug(f"Enabled Velocity Mode")
 
 
-    def enablePositionMode(self):
+    def enablePositionMode(self, ids: List[int]=None):
         torques = self.isTorqueEnable()
         if any(t == 1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(POSITION_MODE)
+        self.__setOperatingMode(POSITION_MODE, ids)
         if any(t == 1 for t in torques):
             self.enableTorque()
         logger.debug(f"Enabled Position Mode")
 
 
-    def enableExtendedPositionMode(self):
+    def enableExtendedPositionMode(self, ids: List[int]=None):
         torques = self.isTorqueEnable()
         if any(t == 1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(EXT_POSITION_MODE)
+        self.__setOperatingMode(EXT_POSITION_MODE, ids)
         if any(t == 1 for t in torques):
             self.enableTorque()
         logger.debug(f"Enabled Extended Position Mode")
 
     
-    def enablePWMMode(self):
+    def enablePWMMode(self, ids: List[int]=None):
         torques = self.isTorqueEnable()
 
         if any(t==1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(PWM_MODE)
+        self.__setOperatingMode(PWM_MODE, ids)
         if any(t==1 for t in torques):
             self.enableTorque()
 
 
-    def enableCurrentMode(self):
+    def enableCurrentMode(self, ids: List[int]=None):
         torques = self.isTorqueEnable()
 
         if any(t==1 for t in torques):
             self.disableTorque()
-        self.__setOperatingMode(CURRENT_MODE)
+        self.__setOperatingMode(CURRENT_MODE, ids)
         if any(t==1 for t in torques):
             self.enableTorque()
 
