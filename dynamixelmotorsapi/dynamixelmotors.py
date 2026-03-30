@@ -92,7 +92,7 @@ class DynamixelMotors:
         if motor_configs and isinstance(motor_configs[0], dict):
             dicts = []
             for d in motor_configs:
-                dicts.extend(self.__unwrap_dict(d))
+                dicts.extend(self._unwrap_dict(d))
             self._motor_configs = [MotorConfig.from_dict(m) for m in dicts]
         else:
             self._motor_configs = motor_configs
@@ -122,7 +122,7 @@ class DynamixelMotors:
 
 
     @classmethod
-    def __unwrap_dict(cls, data: dict) -> List[MotorConfig]:
+    def _unwrap_dict(cls, data: dict) -> List[MotorConfig]:
         """Helper function to convert a dict of motor configs into a list of dicts, one per motor."""
         if isinstance(data["id"], list):
             motors_count = len(data["id"])
@@ -454,25 +454,28 @@ class DynamixelMotors:
         Returns:
             Estimated torque(s) in N·mm (always >= 0).
         """
-        if motor_idx is None and isinstance(currents_mA, list):
-            polys = [self._torque_polys.get(cfg.id) for cfg in self._motor_configs]
-            torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) for i, poly in enumerate(polys)]
-            return [max(0.0, torque_Nm * 1000000.0) for torque_Nm in torques_Nm]
-        elif motor_idx is not None:
-            if isinstance(currents_mA, list):
-                cfg = self._motor_configs[motor_idx]
-                poly = self._torque_polys.get(cfg.id)
-                if motor_idx >= len(currents_mA):
-                    raise ValueError(f"motor_idx {motor_idx} is out of range for the currents_mA list of length {len(currents_mA)}.")
-                torque_Nm = float(np.polyval(poly, currents_mA[motor_idx]/1000))
-                return max(0.0, torque_Nm * 1000000.0)
-            elif isinstance(currents_mA, (int, float)):
-                cfg = self._motor_configs[motor_idx]
-                poly = self._torque_polys.get(cfg.id)
-                torque_Nm = float(np.polyval(poly, currents_mA/1000))
-                return max(0.0, torque_Nm * 1000000.0)
+        if self._torque_polys:
+            if motor_idx is None and isinstance(currents_mA, list):
+                polys = [self._torque_polys.get(cfg.id) for cfg in self._motor_configs]
+                torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) for i, poly in enumerate(polys)]
+                return [max(0.0, torque_Nm * 1000000.0) for torque_Nm in torques_Nm]
+            elif motor_idx is not None:
+                if isinstance(currents_mA, list):
+                    cfg = self._motor_configs[motor_idx]
+                    poly = self._torque_polys.get(cfg.id)
+                    if motor_idx >= len(currents_mA):
+                        raise ValueError(f"motor_idx {motor_idx} is out of range for the currents_mA list of length {len(currents_mA)}.")
+                    torque_Nm = float(np.polyval(poly, currents_mA[motor_idx]/1000))
+                    return max(0.0, torque_Nm * 1000000.0)
+                elif isinstance(currents_mA, (int, float)):
+                    cfg = self._motor_configs[motor_idx]
+                    poly = self._torque_polys.get(cfg.id)
+                    torque_Nm = float(np.polyval(poly, currents_mA/1000))
+                    return max(0.0, torque_Nm * 1000000.0)
+            else:
+                raise ValueError("Invalid input: currents_mA should be a list if motor_idx is None, or a single value if motor_idx is specified.")
         else:
-            raise ValueError("Invalid input: currents_mA should be a list if motor_idx is None, or a single value if motor_idx is specified.")
+            raise ValueError("No torque points or curve estimation was givent at initialization.")
 
 
     ####################
