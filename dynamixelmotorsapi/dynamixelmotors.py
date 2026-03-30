@@ -1,6 +1,8 @@
 from threading import Lock
 from math import pi
 from typing import List
+import atexit
+
 import numpy as np
 
 import dynamixelmotorsapi._motorgroup as motorgroup
@@ -87,6 +89,8 @@ class DynamixelMotors:
             motor_configs: list of MotorConfig, one per motor, ordered by motor index.
         """
         self._lock = Lock()
+
+        atexit.register(self._atexit_close)
         
         # Normalize: if dicts were passed, unwrap and convert to MotorConfig
         if motor_configs and isinstance(motor_configs[0], dict):
@@ -378,6 +382,34 @@ class DynamixelMotors:
         except Exception:
             return -1
         return -1
+
+
+    def emergency_stop(self) -> None:
+        """
+        Immediately disable torque on all motors.
+        Does NOT close the serial port — call close() afterwards if needed.
+        """
+        with self._lock:
+            try:
+                self.torque = False
+            except Exception as e:
+                logger.error(f"Emergency stop: disableTorque failed: {e}")
+        logger.warning("EMERGENCY STOP: torque disabled on all motors.")
+
+
+    def _atexit_close(self) -> None:
+        """
+        Safety shutdown registered with atexit: fires when the Python interpreter
+        exits. Immediately disables motor torque so the physical robot is not left in a commanded position.
+        """
+        try:
+            with self._lock:
+                if not self.is_connected():
+                    return
+                self.torque = False
+                self.close()
+        except Exception:
+            pass  # at interpreter shutdown other objects may already be partially torn down
 
 
     def close(self):
