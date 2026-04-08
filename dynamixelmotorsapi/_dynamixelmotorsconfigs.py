@@ -31,8 +31,10 @@ class ModelConfig:
     model: str
     series: str
     url: str
-
+    torque_points:            Optional[List[Tuple[float, float]]] = None
     resolution:               Optional[int] = None
+
+
     addr_baud_rate:           Optional[int] = None
     len_baud_rate:            Optional[int] = None
     addr_torque_enable:       Optional[int] = None
@@ -49,8 +51,14 @@ class ModelConfig:
     addr_moving_status:       Optional[int] = None
     addr_velocity_profile:    Optional[int] = None
     len_velocity_profile:     Optional[int] = None
+    addr_velocity_limit:      Optional[int] = None
+    len_velocity_limit:       Optional[int] = None
     addr_velocity_trajectory: Optional[int] = None
     len_velocity_trajectory:  Optional[int] = None
+    addr_velocity_p_gain:     Optional[int] = None
+    len_velocity_p_gain:      Optional[int] = None
+    addr_velocity_i_gain:     Optional[int] = None
+    len_velocity_i_gain:      Optional[int] = None
     addr_position_trajectory: Optional[int] = None
     len_position_trajectory:  Optional[int] = None
     addr_position_p_gain:     Optional[int] = None
@@ -61,16 +69,19 @@ class ModelConfig:
     len_position_d_gain:      Optional[int] = None
     addr_present_current:     Optional[int] = None
     len_present_current:      Optional[int] = None
-    current_unit:             Optional[float] = None
     addr_goal_pwm:            Optional[int] = None
     len_goal_pwm:             Optional[int] = None
     addr_present_pwm:         Optional[int] = None
     len_present_pwm:          Optional[int] = None
     addr_pwm_limit:           Optional[int] = None
     len_pwm_limit:            Optional[int] = None
-    min_position_value:       Optional[int] = None
-    max_position_value:       Optional[int] = None
-    torque_points:            Optional[List[Tuple[float, float]]] = None
+    addr_min_position_limit:  Optional[int] = None
+    len_min_position_limit:   Optional[int] = None
+    initial_min_position_limit:   Optional[int] = None
+    addr_max_position_limit:  Optional[int] = None
+    len_max_position_limit:   Optional[int] = None
+    initial_max_position_limit:   Optional[int] = None
+    current_unit:             Optional[float] = None
 
     @property
     def rad_to_pulse(self) -> float:
@@ -121,8 +132,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_present_pwm          = 2,
         addr_pwm_limit           = 64,
         len_pwm_limit            = 2,
-        min_position_value       = 0,
-        max_position_value       = 4095,
+        initial_min_position_limit       = 0,
+        initial_max_position_limit       = 4095,
     ),
 
     "MX_SERIES": ModelConfig(
@@ -159,8 +170,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         addr_present_current     = 126,
         len_present_current      = 2,
         current_unit              = 3.36,  # mA per unit
-        min_position_value       = 0,
-        max_position_value       = 4095,
+        initial_min_position_limit       = 0,
+        initial_max_position_limit       = 4095,
     ),
 
     "P_SERIES": ModelConfig(
@@ -202,8 +213,8 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_present_pwm          = 2,
         addr_pwm_limit           = 36,
         len_pwm_limit            = 2,
-        min_position_value       = -150000,
-        max_position_value       = 150000,
+        initial_min_position_limit       = -150000,
+        initial_max_position_limit       = 150000,
     ),
 }
 

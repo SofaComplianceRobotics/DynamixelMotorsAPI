@@ -403,11 +403,10 @@ class DynamixelMotors:
         exits. Immediately disables motor torque so the physical robot is not left in a commanded position.
         """
         try:
-            with self._lock:
-                if not self.is_connected():
-                    return
-                self.torque = False
-                self.close()
+            if not self.is_connected():
+                return
+            self.torque = False
+            self.close()
         except Exception:
             pass  # at interpreter shutdown other objects may already be partially torn down
 
@@ -486,10 +485,10 @@ class DynamixelMotors:
         Returns:
             Estimated torque(s) in N·mm (always >= 0).
         """
-        if self._torque_polys:
+        if self._torque_polys is not None:
             if motor_idx is None and isinstance(currents_mA, list):
                 polys = [self._torque_polys.get(cfg.id) for cfg in self._motor_configs]
-                torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) for i, poly in enumerate(polys)]
+                torques_Nm = [float(np.polyval(poly, currents_mA[i]/1000)) if poly is not None else -1 for i, poly in enumerate(polys)]
                 return [max(0.0, torque_Nm * 1000000.0) for torque_Nm in torques_Nm]
             elif motor_idx is not None:
                 if isinstance(currents_mA, list):

@@ -40,6 +40,9 @@ SESSION.headers.update({
     "User-Agent": "Mozilla/5.0 (compatible; DynamixelScraper/1.0)"
 })
 
+# ── Utils ──────────────────────────────────────────────────────────────────────
+def snakify(strToSnakeify: str):
+    return re.sub(r'\W+', '_', strToSnakeify).strip('_').lower() # works because we know that Dynamixel data names don't have non-ASCII characters
 
 # ── Data model ─────────────────────────────────────────────────────────────────
 from dynamixelmotorsapi._dynamixelmotorsconfigs import ModelConfig
@@ -52,7 +55,7 @@ MotorConfig  = make_dataclass(
 
 # ── Register name → field mapping ─────────────────────────────────────────────
 #
-# Each entry: (fragment_to_match, addr_field, len_field_or_None)
+# Each entry: (data_name_to_match, addr_field, len_field_or_None)
 # Matching is case-insensitive, first-match wins.
 # More specific entries must come before more generic ones.
 
@@ -71,8 +74,11 @@ REGISTER_MAP = [
     ("position p gain",        "addr_position_p_gain",     "len_position_p_gain",     "initial_position_p_gain"),
     ("position i gain",        "addr_position_i_gain",     "len_position_i_gain",     "initial_position_i_gain"),
     ("position d gain",        "addr_position_d_gain",     "len_position_d_gain",     "initial_position_d_gain"),
-    ("min position limit",     "addr_min_position",        "len_min_position",        "min_position_value"),
-    ("max position limit",     "addr_max_position",        "len_max_position",        "max_position_value"),
+    ("p gain",                 "addr_position_p_gain",     "len_position_p_gain",     "initial_position_p_gain"),   # some models only have i, p and d gain for position e.g: mx-106/
+    ("i gain",                 "addr_position_i_gain",     "len_position_i_gain",     "initial_position_i_gain"),
+    ("d gain",                 "addr_position_d_gain",     "len_position_d_gain",     "initial_position_d_gain"),
+    ("min position limit",     "addr_min_position",        "len_min_position",        "initial_min_position_limit"),
+    ("max position limit",     "addr_max_position",        "len_max_position",        "initial_max_position_llimit"),
 
     # Current
     ("present current",        "addr_present_current",     "len_present_current",     "initial_present_current"),
@@ -87,12 +93,15 @@ REGISTER_MAP = [
     ("present velocity",       "addr_present_velocity",    "len_present_velocity",    "initial_present_velocity"),
     ("velocity trajectory",    "addr_velocity_trajectory", "len_velocity_trajectory", "initial_velocity_trajectory"),
     ("profile velocity",       "addr_velocity_profile",    "len_velocity_profile",    "initial_velocity_profile"),
+    ("velocity p gain",        "addr_velocity_p_gain",     "len_velocity_p_gain",     "initial_velocity_p_gain"),
+    ("velocity i gain",        "addr_velocity_i_gain",     "len_velocity_i_gain",     "initial_velocity_i_gain"),
     ("goal acceleration",      "addr_velocity_profile",    "len_velocity_profile",    "initial_velocity_profile"),   # PRO series uses same field for acceleration
 
     # Moving
     ("moving status",          "addr_moving_status",       "len_moving_status",       "initial_moving_status"),
     ("moving",                 "addr_moving",              "len_moving",              "initial_moving"),
 ]
+
 
 
 # ── Series detection ───────────────────────────────────────────────────────────
@@ -307,22 +316,22 @@ def parse_current_unit(soup: BeautifulSoup) -> Optional[float]:
                     return converted
         
 
-
 def map_registers(registers: dict) -> dict:
     """Apply REGISTER_MAP to produce ModelConfig-compatible field dict."""
     result = {}
     # print(REGISTER_MAP)
 
     for reg_name, reg_data in registers.items():
-        for fragment, addr_field, len_field, ini_field in REGISTER_MAP:
+        # print(reg_name, reg_data)
+        for fragment, addr_name, len_name, initial_name in REGISTER_MAP:
             if fragment in reg_name:
-                if addr_field not in result:
-                    result[addr_field] = reg_data["address"]
-                    if len_field:
-                        result[len_field] = reg_data["size"]
-                        if ini_field:
-                            result[ini_field] = reg_data["initial"]
-                break
+                if addr_name not in result:
+                    result[addr_name] = reg_data["address"]
+                    if len_name:
+                        result[len_name] = reg_data["size"]
+                        if initial_name:
+                            result[initial_name] = reg_data["initial"]
+
     return result
 
 
