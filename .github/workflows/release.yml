@@ -53,7 +53,7 @@ jobs:
 
   release:
     name: Create Release
-    if: always() && startsWith(github.ref, 'refs/heads/') # we are on a branch (not a PR), always() is used to run even if needed steps fail
+    if: always() && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/')) # we are on a branch (not a PR), always() is used to run even if needed steps fail
     needs:
       - build
     runs-on: windows-latest
