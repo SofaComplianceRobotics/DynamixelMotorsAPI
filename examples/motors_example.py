@@ -80,8 +80,6 @@ if __name__ == "__main__":
         logger.info(f"Estimated torque for motor 0 with 3 mA current: {robot_motors.current_to_torque(3, motor_idx=0)}") # estimate of torque for motor 0 based on current in mA
 
         if robot_motors.open():
-
-            
             robot_motors.printStatus()
 
             logger.info("Robot motors opened and configured.")

@@ -13,9 +13,16 @@ python -m pip install git+https://github.com/SofaComplianceRobotics/DynamixelMot
 The Dynamixel Motors API provides the `DynamixelMotors` class, which can be used to control the Motors. The API provides methods for controlling the robot's motors.
 You can look at the [motors_example.py](motors_example.py) file for a simple example of how to use the API to control the motors of the motors.
 
+You have several ways to create a `DynamixelMotors` object: 
+- by using the `from_dicts` method, which takes a list of dictionaries or one dictionnary describing the motors like above 
+- by using a json file containing the same list of dictionaries, and use the `from_json` method
+- by inheriting from `DynamixelMotors` class. This is the recommended way if you need to extend the capabilities of your Dynamixel motors set (e.g. you want to add specific methods or attributes)
+
 
 Simple example thaht sets the angles of 4 *XM430-W210* motors to 0 radians, waits for 1 second, and then prints the status of the robot:
 ```python
+# Standard creation example
+
 import time
 from dynamixelmotorsapi import DynamixelMotors
 
@@ -42,12 +49,46 @@ if robot_motors.open():
     robot_motors.close()
 
 ```
+This is an example of creation using inheritance. Note that you keep the list of dictionnaries notation you use in the previous example.
+```python
+# Inheritance creation example
+
+import time
+from dynamixelmotorsapi import DynamixelMotors
+
+class MyRobot(DynamixelMotors):
+    def __init__(self):
+        super().__init__([{
+            "id": [0, 1, 2, 3],
+            "model": "XM430-W210",
+            "pulley_radius": 20,
+            "pulse_center": 2048,
+            "max_vel": 1000,
+            "baud_rate": 1000000
+        }])
+
+        self.foo_bar = "foo"
+
+    def toggleAttribute(self):
+        self.foo_bar = "foo"if self.foo_bar=="bar" else "foo"
+
+myrobot = MyRobot()
+        
+if robot_motors.open(): 
+    print("Foo Bar attribute: ", myrobot.foo_bar)
+    robot_motors.printStatus()
+    initial_pos_pulse = [0] * len(DXL_IDs)
+    robot_motors.angles = initial_pos_pulse
+    time.sleep(1)
+    robot_motors.printStatus()
+    print("Foo Bar attribute: ", myrobot.foo_bar)
+    robot_motors.close()
+
+```
 
 
 The catalog of Dynamixel motors has been compiled into the file [dynamixel_configs.json](dynamixelmotorsapi\dynamixel_configs.json).
 They've been extracted from the Dynamixel website.
-
-You have several ways to create a `DynamixelMotors` object, either by using the `from_dicts` method, which takes a list of dictionaries or one dictionnary describing the motors like above or you can also use a json file containing the same list of dictionaries, and use the `from_json` method. 
 
 Except for the `id` parameter, which must be a list of unique IDs for each motor, the other parameters can be shared among motors of the same model or can also be lists of values for each motor, as long as they are consistent with the number of motors described in the `id` parameter.
 
