@@ -124,8 +124,11 @@ class MotorGroup:
         # Group motors by models so each GroupSyncRead/Write uses a consistent
         # address and length. Dict key is model name, value is list of MotorConfigs.
         self._models_groups: Dict[str, List[MotorConfig]] = {}
+        self.baud_rate = motor_configs[0].baud_rate
         for cfg in motor_configs:
             self._models_groups.setdefault(cfg.model, []).append(cfg)
+            if self.baud_rate != cfg.baud_rate:
+                raise ValueError(f"The baud rates must be the same for all motors. Baud rates given: {[c.baud_rate for c in motor_configs]}")
 
         # Per-models sync read/write groups: {model_name: {reader_name: GroupSyncRead}}
         self.groupReaders: Dict[str, Dict[str, GroupSyncRead]] = {}
@@ -281,6 +284,7 @@ class MotorGroup:
         """Open the port"""
         try:
             self.portHandler.openPort()
+            self.portHandler.setBaudRate(self.baud_rate)
             logger.debug(f"Port opened")
         except Exception as e:
             raise Exception(f"Failed to open port: {e}")
@@ -330,7 +334,6 @@ class MotorGroup:
         """Return the torque enable state for each motor."""
         result = []
         for cfg in self.motorsConfig:
-            self.portHandler.setBaudRate(cfg.baud_rate)
             torque, dxl_comm_result, dxl_error = self.packetHandler.read1ByteTxRx(
                 self.portHandler, cfg.id, cfg.model_config.addr_torque_enable
             )
@@ -358,7 +361,6 @@ class MotorGroup:
         else:
             for cfg in self.motorsConfig:
                 if ids is None or cfg.id in ids:
-                    self.portHandler.setBaudRate(cfg.baud_rate)
                     dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
                         self.portHandler, cfg.id, cfg.model_config.addr_operating_mode, mode
                     )
@@ -451,8 +453,6 @@ class MotorGroup:
         """
         for cfg in self.motorsConfig:
             addr = addr_fn(cfg)
-            
-            self.portHandler.setBaudRate(cfg.baud_rate)
 
             dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
                 self.portHandler, cfg.id, addr, value
@@ -480,9 +480,6 @@ class MotorGroup:
         # Collect results keyed by motor ID across all models
         results_by_id = {}
         for model_name, readers in self.groupReaders.items():
-            
-            self.portHandler.setBaudRate(self._models_groups[model_name][0].baud_rate)
-
             group = readers[reader_name]
             dxl_comm_result = group.txRxPacket()
             if dxl_comm_result != COMM_SUCCESS:
@@ -516,7 +513,6 @@ class MotorGroup:
         values_by_id = {cfg.id: values[i] for i, cfg in enumerate(self.motorsConfig)}
 
         for model_name, writers in self.groupWriters.items(): # iterate through motor models in groupwriters
-            self.portHandler.setBaudRate(self._models_groups[model_name][0].baud_rate)
             group = writers[writer_name]
             group.clearParam()
             for cfg in self._models_groups[model_name]: # get the MotorConfigs for model model_name

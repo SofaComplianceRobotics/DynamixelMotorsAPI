@@ -18,6 +18,8 @@ class DynamixelMotors:
     The motor group is configured via a list of MotorConfig objects, one per motor,
     which can be loaded from a dict or JSON file.
 
+    All the motors baud rates should be the same, an exception will raise if not
+
     Example:
         ```python
         from dynamixelmotorsapi import DynamixelMotors

@@ -227,30 +227,38 @@ wheels = [
 
 [[package]]
 name = "dynamixelmotorsapi"
-version = "0.2.0"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "beautifulsoup4" },
     { name = "dynamixel-sdk" },
-    { name = "easyocr" },
     { name = "numpy" },
+    { name = "pyserial" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "beautifulsoup4" },
+    { name = "easyocr" },
     { name = "opencv-contrib-python" },
     { name = "opencv-python" },
     { name = "pillow" },
-    { name = "pyserial" },
     { name = "requests" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.7.0" },
     { name = "dynamixel-sdk" },
-    { name = "easyocr", specifier = ">=1.7.2" },
     { name = "numpy", specifier = "==1.26.4" },
+    { name = "pyserial" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "beautifulsoup4", specifier = ">=4.7.0" },
+    { name = "easyocr", specifier = ">=1.7.2" },
     { name = "opencv-contrib-python", specifier = ">=4.11.0.86" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "pillow", specifier = ">=12.1.1" },
-    { name = "pyserial" },
     { name = "requests" },
 ]
 

@@ -18,6 +18,7 @@ You have several ways to create a `DynamixelMotors` object:
 - by using a json file containing the same list of dictionaries, and use the `from_json` method
 - by inheriting from `DynamixelMotors` class. This is the recommended way if you need to extend the capabilities of your Dynamixel motors set (e.g. you want to add specific methods or attributes)
 
+⚠️ You cannot specify different baud rates into the same DynamixelMotors object, they all have to be the same, otherwise, an exception will be raised at init.
 
 Simple example thaht sets the angles of 4 *XM430-W210* motors to 0 radians, waits for 1 second, and then prints the status of the robot:
 ```python
@@ -85,7 +86,6 @@ if robot_motors.open():
     robot_motors.close()
 
 ```
-
 
 The catalog of Dynamixel motors has been compiled into the file [dynamixel_configs.json](dynamixelmotorsapi\dynamixel_configs.json).
 They've been extracted from the Dynamixel website.
