@@ -1,3 +1,14 @@
+"""
+This module provides an API for controlling Dynamixel motors using FTDI devices. 
+
+You can list the FTDI devices connected to your computer using the following functions:
+- `dynamixelmotorsapi.listFTDIDevices()`: Lists all FTDI devices connected to the computer.
+- `dynamixelmotorsapi.listUnusedFTDIDevices()`: Lists FTDI devices that are not currently used by any instance of DynamixelMotors in this process.
+- `dynamixelmotorsapi.listUsedFTDIDevices()`: Lists FTDI devices that are currently used by an instance of DynamixelMotors in this process.
+
+
+"""
+
 from importlib.resources import files
 
 from .dynamixelmotors import DynamixelMotors, motorgroup
