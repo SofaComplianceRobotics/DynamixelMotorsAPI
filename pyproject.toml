@@ -44,7 +44,7 @@ type = "python"
 type = "filter"
 skip_empty_modules = true
 exclude_private = true
-expression = "not name.startswith('_') and '_' not in obj.location.filename and default() and 'scraper' not in name"
+expression = "not name.startswith('_') and '_' not in obj.location.filename and default() and 'scraper' not in name or ('__init__' in obj.location.filename and default())"
 
 [[tool.pydoc-markdown.processors]]
 type="smart"
@@ -64,7 +64,7 @@ add_full_prefix = false
 insert_header_anchors = false
 classdef_code_block = true
 signature_code_block = true
-signature_in_header = false
+signature_in_header = true
 code_headers = false
 use_fixed_header_levels = true
 render_toc = false
