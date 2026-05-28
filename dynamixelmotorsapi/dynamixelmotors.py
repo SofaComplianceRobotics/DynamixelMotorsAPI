@@ -1,3 +1,17 @@
+"""
+[DynamixelMotorsAPI](https://github.com/SofaComplianceRobotics/DynamixelMotorsAPI) is a Python API 
+to control Dynamixel motors, supporting heterogeneous motor groups where each motor can be a 
+different series with different conversion parameters.
+
+To install the API, run:
+```bash
+pip install https://github.com/SofaComplianceRobotics/DynamixelMotorsAPI@main
+```
+
+The motor group is configured via a list of MotorConfig objects, one per motor, which can be loaded from a dict or JSON file.
+
+"""
+
 from threading import Lock
 from math import pi
 from typing import List
