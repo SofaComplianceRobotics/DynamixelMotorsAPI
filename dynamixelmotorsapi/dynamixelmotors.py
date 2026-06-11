@@ -707,6 +707,18 @@ class DynamixelMotors:
         with self._lock:
             self._mg.setPresentCurrent(currents)
 
+    @property
+    def temp_limits(self):
+        """Get the temperature limit set for the motors"""
+        with self._lock:
+            return self._mg.getTempLimit()
+        
+    @temp_limits.setter
+    def temp_limits(self, max_temp: list):
+        """Set the maximum temperature of the motors before an overheating error is set"""
+        with self._lock:
+            self._mg.setTempLimit(max_temp)
+
 
     #### Read-only properties ####
 
@@ -764,4 +776,9 @@ class DynamixelMotors:
         """Get the position (pulse) trajectory of the motors."""
         with self._lock:
             return self._mg.getPositionTrajectory()
-    
+        
+    @property
+    def temperatures(self) -> list:
+        """Get the temperature of the motors"""
+        with self._lock:
+            return self._mg.getTemperatures()

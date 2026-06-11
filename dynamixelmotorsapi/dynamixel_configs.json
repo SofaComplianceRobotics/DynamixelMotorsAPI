@@ -73,6 +73,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -149,6 +153,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -225,6 +233,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -301,6 +313,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -377,6 +393,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -453,6 +473,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -529,6 +553,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -605,6 +633,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -681,6 +713,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -757,6 +793,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -833,6 +873,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -909,6 +953,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 10.0,
+    "addr_temp_limit": 56,
+    "len_temp_limit": 1,
+    "addr_present_temp": null,
+    "len_present_temp": null,
     "errors": []
   },
   {
@@ -985,6 +1033,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1061,6 +1113,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1137,6 +1193,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1213,6 +1273,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1289,6 +1353,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1365,6 +1433,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1420,6 +1492,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 12,
+    "len_temp_limit": 1,
+    "addr_present_temp": 46,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1496,6 +1572,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1572,6 +1652,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1648,6 +1732,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1724,6 +1812,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1800,6 +1892,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1876,6 +1972,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -1952,6 +2052,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2028,6 +2132,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2104,6 +2212,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2180,6 +2292,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2256,6 +2372,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2332,6 +2452,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2408,6 +2532,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2484,6 +2612,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2560,6 +2692,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.34,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2636,6 +2772,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.34,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2712,6 +2852,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2788,6 +2932,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2864,6 +3012,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -2940,6 +3092,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 2.69,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3016,6 +3172,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3092,6 +3252,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3168,6 +3332,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3244,6 +3412,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3320,6 +3492,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3396,6 +3572,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3472,6 +3652,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3548,6 +3732,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3624,6 +3812,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3700,6 +3892,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3776,6 +3972,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3852,6 +4052,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3907,6 +4111,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -3962,6 +4170,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4017,6 +4229,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4093,6 +4309,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4169,6 +4389,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4245,6 +4469,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4321,6 +4549,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 3.36,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4397,6 +4629,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 3.36,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4473,6 +4709,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 146,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4528,6 +4768,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4583,6 +4827,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4638,6 +4886,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4693,6 +4945,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4748,6 +5004,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4803,6 +5063,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4858,6 +5122,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4913,6 +5181,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -4968,6 +5240,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5023,6 +5299,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5078,6 +5358,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 11,
+    "len_temp_limit": 1,
+    "addr_present_temp": 43,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5154,6 +5438,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5230,6 +5518,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5306,6 +5598,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5382,6 +5678,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5458,6 +5758,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5534,6 +5838,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5610,6 +5918,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5686,6 +5998,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5762,6 +6078,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5838,6 +6158,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5914,6 +6238,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -5990,6 +6318,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -6066,6 +6398,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -6142,6 +6478,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": null,
+    "addr_temp_limit": 21,
+    "len_temp_limit": 1,
+    "addr_present_temp": 625,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -6218,6 +6558,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -6294,6 +6638,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   },
   {
@@ -6370,6 +6718,10 @@
     "len_max_position_limit": null,
     "initial_max_position_limit": null,
     "current_unit": 1.0,
+    "addr_temp_limit": 31,
+    "len_temp_limit": 1,
+    "addr_present_temp": 594,
+    "len_present_temp": 1,
     "errors": []
   }
 ]

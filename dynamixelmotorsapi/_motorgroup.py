@@ -193,7 +193,13 @@ class MotorGroup:
                                 sc.len_pwm_limit),
                 "goal_pwm": GroupSyncRead(self.portHandler, self.packetHandler,
                                 sc.addr_goal_pwm,
-                                sc.len_goal_pwm)
+                                sc.len_goal_pwm),
+                "temp_limit": GroupSyncRead(self.portHandler, self.packetHandler,
+                                sc.addr_temp_limit,
+                                sc.len_temp_limit),
+                "present_temp": GroupSyncRead(self.portHandler, self.packetHandler,
+                                sc.addr_present_temp,
+                                sc.len_present_temp)
             }
 
             writers = {
@@ -226,7 +232,10 @@ class MotorGroup:
                                 sc.len_pwm_limit),
                 "goal_pwm": GroupSyncWrite(self.portHandler, self.packetHandler,
                                 sc.addr_goal_pwm,
-                                sc.len_goal_pwm)
+                                sc.len_goal_pwm),
+                "temp_limit": GroupSyncWrite(self.portHandler, self.packetHandler,
+                                sc.addr_temp_limit,
+                                sc.len_temp_limit),
             }
 
             # Register all motor IDs in this model with every reader
@@ -652,3 +661,15 @@ class MotorGroup:
     def getPresentPWM(self) -> list:
         """Get the present PWM for each motor."""
         return self._readSyncMotorsData("pwm")
+
+    def getTempLimit(self) -> list:
+        """Get the present temperature limit"""
+        return self._readSyncMotorsData("temp_limit")
+
+    def setTempLimit(self, max_temp: list):
+        """Set the maximum operating temperature before shutdown of all the motors"""
+        self.__writeSyncMotorsData("temp_limit", max_temp)
+    
+    def getTemperatures(self) -> list :
+        """Get the present temperatures of the motors"""
+        self._readSyncMotorsData("present_temp")

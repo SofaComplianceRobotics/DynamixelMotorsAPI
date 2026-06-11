@@ -100,6 +100,10 @@ REGISTER_MAP = [
     # Moving
     ("moving status",          "addr_moving_status",       "len_moving_status",       "initial_moving_status"),
     ("moving",                 "addr_moving",              "len_moving",              "initial_moving"),
+
+    # Temperature
+    ("temperature limit",       "addr_temp_limit",         "len_temp_limit",          "initial_temp_limit"),
+    ("present temperature",     "addr_present_temp",       "len_present_temp",        "initial_present_temp")
 ]
 
 

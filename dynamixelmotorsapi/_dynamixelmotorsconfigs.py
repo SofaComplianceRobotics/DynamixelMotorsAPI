@@ -82,6 +82,11 @@ class ModelConfig:
     len_max_position_limit:   Optional[int] = None
     initial_max_position_limit:   Optional[int] = None
     current_unit:             Optional[float] = None
+    addr_temp_limit:          Optional[int] = None
+    len_temp_limit:           Optional[int] = None
+    addr_present_temp:        Optional[int] = None
+    len_present_temp:         Optional[int] = None
+
 
     @property
     def rad_to_pulse(self) -> float:
@@ -134,6 +139,10 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_pwm_limit            = 2,
         initial_min_position_limit       = 0,
         initial_max_position_limit       = 4095,
+        addr_temp_limit          = 31,
+        len_temp_limit           = 1,
+        addr_present_temp        = 146,
+        len_present_temp         = 1
     ),
 
     "MX_SERIES": ModelConfig(
@@ -172,6 +181,10 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         current_unit              = 3.36,  # mA per unit
         initial_min_position_limit       = 0,
         initial_max_position_limit       = 4095,
+        addr_temp_limit          = 31,
+        len_temp_limit           = 1,
+        addr_present_temp        = 146,
+        len_present_temp         = 1
     ),
 
     "P_SERIES": ModelConfig(
@@ -215,6 +228,10 @@ MODELS_CONFIGS: Dict[str, ModelConfig] = {
         len_pwm_limit            = 2,
         initial_min_position_limit       = -150000,
         initial_max_position_limit       = 150000,
+        addr_temp_limit          = 31,
+        len_temp_limit           = 1,
+        addr_present_temp         = 594,
+        len_present_temp         = 1
     ),
 }
 
