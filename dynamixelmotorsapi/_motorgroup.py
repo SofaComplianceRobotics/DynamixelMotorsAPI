@@ -526,6 +526,8 @@ class MotorGroup:
             group.clearParam()
             for cfg in self._models_groups[model_name]: # get the MotorConfigs for model model_name
                 val = values_by_id[cfg.id]
+                if group.data_length == 1:
+                    data = [val]
                 if group.data_length == 2:
                     data = _valTo2Bytes(val)
                 elif group.data_length == 4:
@@ -672,4 +674,4 @@ class MotorGroup:
     
     def getTemperatures(self) -> list :
         """Get the present temperatures of the motors"""
-        self._readSyncMotorsData("present_temp")
+        return self._readSyncMotorsData("present_temp")
