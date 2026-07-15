@@ -528,7 +528,7 @@ class MotorGroup:
                 val = values_by_id[cfg.id]
                 if group.data_length == 1:
                     data = [val]
-                if group.data_length == 2:
+                elif group.data_length == 2:
                     data = _valTo2Bytes(val)
                 elif group.data_length == 4:
                     data = _valToArray(val)
