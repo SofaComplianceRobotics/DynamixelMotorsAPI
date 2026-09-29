@@ -10,7 +10,7 @@ readme = "README.md"
 dependencies = [
     "pyserial",
     "dynamixel_sdk",
-    "numpy==1.26.4",
+    "numpy",
 ]
 description = "An API for controlling  the motors of a group of Dynamixel motors."
 keywords = ["robotics", "api", "dynamixel"]
