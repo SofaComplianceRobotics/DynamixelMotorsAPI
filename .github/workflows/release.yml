@@ -15,7 +15,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 3 * * *' # nightly job at 3am UTC
+    - cron: '0 0 * * 0' 
 
 permissions:
   contents: read
